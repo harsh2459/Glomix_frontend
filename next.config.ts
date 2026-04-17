@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
       { protocol: 'https', hostname: 'via.placeholder.com' },
       { protocol: 'https', hostname: 'placehold.co' },
+      { protocol: 'https', hostname: '*.r2.cloudflarestorage.com' },
+      { protocol: 'https', hostname: '*.r2.dev' },
+      { protocol: 'https', hostname: '*.s3.amazonaws.com' },
+      { protocol: 'https', hostname: '*.s3.*.amazonaws.com' },
+      { protocol: 'http', hostname: 'localhost' },
     ],
     // Don't fail the build or page when an image 404s
     dangerouslyAllowSVG: true,

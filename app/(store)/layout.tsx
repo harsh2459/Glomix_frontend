@@ -21,9 +21,12 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
 
 async function StoreLayoutInner({ children }: { children: React.ReactNode }) {
   const settings = await getSettings();
+  const hasAnnouncementBar = !!(settings?.announcementBar?.isEnabled && settings?.announcementBar?.text);
   return (
     <div className="flex flex-col min-h-screen">
       <Header settings={settings} />
+      {/* Spacer for fixed header: h-16 (64px) + optional announcement bar (~40px) */}
+      <div style={{ height: hasAnnouncementBar ? '104px' : '64px' }} className="shrink-0" />
       <main className="flex-1">{children}</main>
       <Footer settings={settings} />
     </div>

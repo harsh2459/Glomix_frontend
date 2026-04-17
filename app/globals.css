@@ -37,7 +37,6 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
   min-height: 100vh;
-  overflow-x: hidden;
 }
 
 /* ── Typography ───────────────────────────────────────────────── */

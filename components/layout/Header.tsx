@@ -70,33 +70,31 @@ export default function Header({ settings }: HeaderProps) {
 
   return (
     <>
-      {/* Announcement Bar */}
-      {settings?.announcementBar?.isEnabled && (
-        <div
-          className="announcement-bar text-sm py-2 px-4 text-center"
-          style={{
-            backgroundColor: settings.announcementBar.backgroundColor,
-            color: settings.announcementBar.textColor,
-          }}
-        >
-          {settings.announcementBar.link ? (
-            <Link href={settings.announcementBar.link} className="hover:opacity-80 transition-opacity">
-              {settings.announcementBar.text}
-            </Link>
-          ) : (
-            <span>{settings.announcementBar.text}</span>
-          )}
-        </div>
-      )}
+      <div className="fixed top-0 left-0 right-0 z-50 w-full">
+        {/* Announcement Bar */}
+        {settings?.announcementBar?.isEnabled && settings.announcementBar.text && (
+          <div
+            className="text-sm py-2 px-4 text-center"
+            style={{
+              backgroundColor: settings.announcementBar.backgroundColor || '#111827',
+              color: settings.announcementBar.textColor || '#ffffff',
+            }}
+          >
+            {settings.announcementBar.link ? (
+              <Link href={settings.announcementBar.link} className="hover:opacity-80 transition-opacity">
+                {settings.announcementBar.text}
+              </Link>
+            ) : (
+              <span>{settings.announcementBar.text}</span>
+            )}
+          </div>
+        )}
 
       <header
         className={cn(
-          'sticky top-0 z-50 w-full transition-all duration-300',
-          isScrolled
-            ? 'shadow-md border-b border-gray-100'
-            : 'border-b border-gray-100'
+          'w-full bg-white border-b border-gray-200 transition-all duration-300',
+          isScrolled ? 'shadow-lg' : 'shadow-sm'
         )}
-        style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(0,0,0,0.07)' }}
       >
         <nav className="container">
           <div className="flex items-center justify-between h-16 gap-4">
@@ -269,6 +267,7 @@ export default function Header({ settings }: HeaderProps) {
           )}
         </nav>
       </header>
+      </div>  
 
       <CartDrawer />
     </>

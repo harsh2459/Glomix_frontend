@@ -1,4 +1,4 @@
-  import { Metadata } from 'next';
+import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Sparkles, Leaf, Shield, Truck, Star, ChevronRight } from 'lucide-react';
@@ -131,33 +131,88 @@ function USPStrip({ settings }: { settings: ISiteSettings | null }) {
   );
 }
 
+function CategoryCard({ cat }: { cat: ICategory }) {
+  const pastelColors = [
+    'from-rose-100 to-pink-50',
+    'from-purple-100 to-violet-50',
+    'from-amber-100 to-yellow-50',
+    'from-teal-100 to-cyan-50',
+    'from-blue-100 to-indigo-50',
+    'from-green-100 to-emerald-50',
+    'from-orange-100 to-red-50',
+    'from-pink-100 to-fuchsia-50',
+  ];
+  // Deterministic color based on name
+  const colorIdx = cat.name.charCodeAt(0) % pastelColors.length;
+
+  return (
+    <Link
+      href={`/category/${cat.slug}`}
+      className="group relative rounded-2xl overflow-hidden aspect-square border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-300 block"
+    >
+      {cat.image ? (
+        <>
+          <Image
+            src={cat.image}
+            alt={cat.name}
+            fill
+            className="object-cover group-hover:scale-110 transition-transform duration-500"
+            sizes="(max-width: 768px) 50vw, 25vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-4">
+            <h3 className="font-heading text-base font-bold text-white drop-shadow-lg">{cat.name}</h3>
+            <p className="text-xs text-white/70 mt-0.5 flex items-center gap-1">
+              Shop Now <ChevronRight size={12} className="group-hover:translate-x-1 transition-transform" />
+            </p>
+          </div>
+        </>
+      ) : (
+        /* No image — elegant pastel card */
+        <div className={`w-full h-full bg-gradient-to-br ${pastelColors[colorIdx]} flex flex-col items-center justify-center p-6 text-center`}>
+          <div className="w-14 h-14 rounded-full bg-white/60 flex items-center justify-center mb-3 shadow-sm text-2xl">
+            {cat.name[0]}
+          </div>
+          <h3 className="font-heading text-base font-bold text-gray-800">{cat.name}</h3>
+          {cat.description && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{cat.description}</p>}
+          <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-gray-600">
+            Explore <ChevronRight size={12} className="group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+      )}
+    </Link>
+  );
+}
+
 function CategorySection({ categories }: { categories: ICategory[] }) {
   if (categories.length === 0) return null;
+  // Show max 4 on homepage
+  const displayed = categories.slice(0, 4);
+  const hasMore = categories.length > 4;
   return (
     <section className="section">
       <div className="container">
-        <div className="text-center mb-12">
-          <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">Shop by Category</h2>
-          <p className="text-gray-500 max-w-xl mx-auto">Explore our range of natural beauty products crafted for every skin type</p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {categories.slice(0, 8).map((cat) => (
-            <Link
-              key={cat._id}
-              href={`/category/${cat.slug}`}
-              className="group relative rounded-2xl overflow-hidden aspect-square"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-black/40 to-black/20" />
-              {cat.image && (
-                <Image src={cat.image} alt={cat.name} fill className="object-cover opacity-60 group-hover:scale-110 transition-transform duration-500" sizes="(max-width: 768px) 50vw, 25vw" />
-              )}
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-                <h3 className="font-heading text-lg font-bold text-white drop-shadow-lg">{cat.name}</h3>
-                <ChevronRight size={16} className="mt-2 text-white group-hover:translate-x-1 transition-transform" />
-              </div>
+        <div className="flex items-end justify-between mb-10">
+          <div className="text-center md:text-left">
+            <h2 className="font-heading text-3xl md:text-4xl font-bold mb-3">Shop by Category</h2>
+            <p className="text-gray-500 max-w-xl">Explore our range of natural beauty products crafted for every skin type</p>
+          </div>
+          {hasMore && (
+            <Link href="/categories" className="btn-ghost text-gray-500 hover:text-gray-800 gap-1 shrink-0 hidden sm:flex">
+              All Categories <ArrowRight size={16} />
             </Link>
-          ))}
+          )}
         </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {displayed.map((cat) => <CategoryCard key={cat._id} cat={cat} />)}
+        </div>
+        {hasMore && (
+          <div className="text-center mt-8">
+            <Link href="/categories" className="btn-outline px-8">
+              View All Categories
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -328,27 +383,32 @@ async function DynamicSectionRenderer({ section, settings, banners, categories, 
          displayCategories = categories.filter((c: any) => conf.selectedCategoryIds.includes(c._id));
       }
       
+      const cmsLimit = Math.min(catLimit, 4);
+      const cmsHasMore = displayCategories.length > cmsLimit;
       return (
         <section className="section">
           <div className="container">
-            <div className="text-center mb-12">
-              <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">{catTitle}</h2>
-              <p className="text-gray-500 max-w-xl mx-auto">{catSub}</p>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {displayCategories.slice(0, catLimit).map((cat: ICategory) => (
-                <Link key={cat._id} href={`/category/${cat.slug}`} className="group relative rounded-2xl overflow-hidden aspect-square">
-                  <div className="absolute inset-0 bg-gradient-to-br from-black/40 to-black/20" />
-                  {cat.image && (
-                    <img src={cat.image} alt={cat.name} className="object-cover w-full h-full opacity-60 group-hover:scale-110 transition-transform duration-500" />
-                  )}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-                    <h3 className="font-heading text-lg font-bold text-white drop-shadow-lg">{cat.name}</h3>
-                    <ChevronRight size={16} className="mt-2 text-white group-hover:translate-x-1 transition-transform" />
-                  </div>
+            <div className="flex items-end justify-between mb-10">
+              <div>
+                <h2 className="font-heading text-3xl md:text-4xl font-bold mb-3">{catTitle}</h2>
+                <p className="text-gray-500 max-w-xl">{catSub}</p>
+              </div>
+              {cmsHasMore && (
+                <Link href="/categories" className="btn-ghost text-gray-500 hover:text-gray-800 gap-1 shrink-0 hidden sm:flex">
+                  All Categories <ArrowRight size={16} />
                 </Link>
+              )}
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {displayCategories.slice(0, cmsLimit).map((cat: ICategory) => (
+                <CategoryCard key={cat._id} cat={cat} />
               ))}
             </div>
+            {cmsHasMore && (
+              <div className="text-center mt-8">
+                <Link href="/categories" className="btn-outline px-8">View All Categories</Link>
+              </div>
+            )}
           </div>
         </section>
       );

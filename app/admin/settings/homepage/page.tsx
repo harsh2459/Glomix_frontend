@@ -37,6 +37,8 @@ const SECTION_TYPES = [
   { type: 'Hero Banner', icon: LayoutTemplate },
   { type: 'Hero Slider', icon: Layers },
   { type: 'Image Slider', icon: ImagePlay },
+  { type: 'Announcement Bar', icon: MessageSquare },
+  { type: 'USP Strip', icon: Sparkles },
   { type: 'Staggered Wall', icon: LayoutGrid },
   { type: 'Puzzle Game', icon: Puzzle },
   { type: 'Promo Banner', icon: ImageIcon },
@@ -45,7 +47,6 @@ const SECTION_TYPES = [
   { type: 'Video Showcase', icon: Video },
   { type: 'Testimonial Slider', icon: MessageSquare },
   { type: 'Blog Section', icon: FileText },
-  { type: 'USP Strip', icon: Sparkles },
   { type: 'Custom HTML', icon: Code },
 ];
 
@@ -410,6 +411,77 @@ function ConfigEditor({
      );
   };
 
+  const renderAnnouncementBar = () => (
+    <div className="space-y-4">
+      <div>
+        <label className="label">Message Text</label>
+        <input className="input" placeholder="e.g. Free shipping on orders above ₹499!" value={localConfig.text || ''} onChange={e => updateConfig('text', e.target.value)} />
+      </div>
+      <div>
+        <label className="label">Link URL (optional)</label>
+        <input className="input" placeholder="/products?sale=true" value={localConfig.link || ''} onChange={e => updateConfig('link', e.target.value)} />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="label">Background Color</label>
+          <div className="flex gap-2">
+            <input type="color" className="w-10 h-10 rounded border border-gray-200 cursor-pointer p-0.5" value={localConfig.backgroundColor || '#111827'} onChange={e => updateConfig('backgroundColor', e.target.value)} />
+            <input className="input flex-1" value={localConfig.backgroundColor || '#111827'} onChange={e => updateConfig('backgroundColor', e.target.value)} placeholder="#111827" />
+          </div>
+        </div>
+        <div>
+          <label className="label">Text Color</label>
+          <div className="flex gap-2">
+            <input type="color" className="w-10 h-10 rounded border border-gray-200 cursor-pointer p-0.5" value={localConfig.textColor || '#ffffff'} onChange={e => updateConfig('textColor', e.target.value)} />
+            <input className="input flex-1" value={localConfig.textColor || '#ffffff'} onChange={e => updateConfig('textColor', e.target.value)} placeholder="#ffffff" />
+          </div>
+        </div>
+      </div>
+      <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-700">
+        Note: The announcement bar appears above the header. Enable/disable it from the <b>Site Settings → General</b> page.
+      </div>
+    </div>
+  );
+
+  const renderUSPStrip = () => {
+    const items = Array.isArray(localConfig.items) ? localConfig.items : [];
+    return (
+      <div className="space-y-4">
+        <div>
+          <label className="label">Background Style</label>
+          <select className="input" value={localConfig.style || 'light'} onChange={e => updateConfig('style', e.target.value)}>
+            <option value="light">Light (white/gray)</option>
+            <option value="dark">Dark</option>
+            <option value="primary">Brand Color</option>
+          </select>
+        </div>
+        {items.map((item: any, idx: number) => (
+          <div key={idx} className="p-3 border border-gray-200 rounded-lg space-y-2 relative group">
+            <button onClick={() => { const u = [...items]; u.splice(idx,1); updateConfig('items', u); }}
+              className="absolute -top-2 -right-2 w-6 h-6 bg-white border text-red-500 rounded-full shadow text-xs flex items-center justify-center opacity-0 group-hover:opacity-100">×</button>
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="label text-[10px]">Icon (emoji or name)</label>
+                <input className="input text-sm" value={item.iconName || ''} onChange={e => { const u=[...items]; u[idx].iconName=e.target.value; updateConfig('items',u); }} placeholder="🌿 or leaf" />
+              </div>
+              <div>
+                <label className="label text-[10px]">Title</label>
+                <input className="input text-sm" value={item.title || ''} onChange={e => { const u=[...items]; u[idx].title=e.target.value; updateConfig('items',u); }} placeholder="100% Natural" />
+              </div>
+              <div>
+                <label className="label text-[10px]">Description</label>
+                <input className="input text-sm" value={item.desc || ''} onChange={e => { const u=[...items]; u[idx].desc=e.target.value; updateConfig('items',u); }} placeholder="Pure ingredients" />
+              </div>
+            </div>
+          </div>
+        ))}
+        <button onClick={() => updateConfig('items', [...items, { iconName: '', title: '', desc: '' }])} className="btn-outline w-full gap-2 border-dashed text-sm">
+          <Plus size={14} /> Add Item
+        </button>
+      </div>
+    );
+  };
+
   // Fallback json editor
   const renderJsonFallback = () => (
     <div className="space-y-4">
@@ -465,6 +537,8 @@ function ConfigEditor({
            section.type === 'Blog Section' || section.id === 'blog' ? renderBlogSection() :
            section.type === 'Testimonial Slider' || section.id === 'testimonials' ? renderTestimonialSlider() :
            section.type === 'Custom HTML' ? renderCustomHTML() :
+           section.type === 'Announcement Bar' || section.id === 'announcement' ? renderAnnouncementBar() :
+           section.type === 'USP Strip' || section.id === 'usp' ? renderUSPStrip() :
            renderJsonFallback()}
         </div>
       </div>
