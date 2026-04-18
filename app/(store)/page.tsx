@@ -107,12 +107,12 @@ function USPStrip({ settings }: { settings: ISiteSettings | null }) {
     : DEFAULT_USP;
 
   return (
-    <section className="section-sm" style={{ background: 'var(--color-surface)' }}>
+    <section className="section-sm" style={{ background: '#f4f1ec' }}>
       <div className="container">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {usps.map((usp, i) => (
             <div key={i} className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-100 transition-colors">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(0,0,0,0.06)', color: 'var(--color-primary)' }}>
+              <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(0,0,0,0.06)', color: '#0a0a0a' }}>
                 {usp.iconName?.startsWith('http') || usp.iconName?.startsWith('/') || usp.iconName?.startsWith('data:') ? (
                   <img src={usp.iconName} alt={usp.title} className="w-5 h-5 object-contain" />
                 ) : (
@@ -267,7 +267,7 @@ function TestimonialsSection({ reviews }: { reviews: IReview[] }) {
                 </div>
                 <p className="text-gray-600 text-sm leading-relaxed mb-4">&quot;{review.comment}&quot;</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: 'rgba(0,0,0,0.06)', color: 'var(--color-primary)' }}>
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: 'rgba(0,0,0,0.06)', color: '#0a0a0a' }}>
                     {review.userName?.[0]?.toUpperCase() ?? 'U'}
                   </div>
                   <div>
@@ -286,7 +286,7 @@ function TestimonialsSection({ reviews }: { reviews: IReview[] }) {
                 </div>
                 <p className="text-gray-600 text-sm leading-relaxed mb-4">&quot;{review.text}&quot;</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: 'rgba(0,0,0,0.06)', color: 'var(--color-primary)' }}>
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: 'rgba(0,0,0,0.06)', color: '#0a0a0a' }}>
                     {review.name[0]}
                   </div>
                   <div>
@@ -306,7 +306,7 @@ function TestimonialsSection({ reviews }: { reviews: IReview[] }) {
 function BlogSection({ blogs }: { blogs: IBlog[] }) {
   if (blogs.length === 0) return null;
   return (
-    <section className="section" style={{ background: 'var(--color-surface)' }}>
+    <section className="section" style={{ background: '#f4f1ec' }}>
       <div className="container">
         <div className="flex items-end justify-between mb-10">
           <div>

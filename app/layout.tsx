@@ -51,26 +51,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const settings = await getSiteSettings();
   const theme = settings?.theme;
 
-  // Build dynamic CSS custom properties from DB settings
-  const themeVars = theme ? `
-    :root {
-      --color-primary: ${theme.primaryColor};
-      --color-secondary: ${theme.secondaryColor};
-      --color-accent: ${theme.accentColor};
-      --color-bg: ${theme.backgroundColor};
-      --color-surface: ${theme.surfaceColor};
-      --color-text: ${theme.textColor};
-      --color-muted: ${theme.mutedColor};
-      --radius: ${theme.borderRadius};
-    }
-  ` : '';
-
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth" className={`${inter.variable} ${playfair.variable}`}>
       <head>
-        {themeVars && (
-          <style id="theme-vars" suppressHydrationWarning dangerouslySetInnerHTML={{ __html: themeVars }} />
-        )}
         {settings?.customHeadScripts && (
           <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: settings.customHeadScripts }} />
         )}

@@ -61,7 +61,7 @@ export default async function BlogListingPage({
         <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
           <BookOpen size={13} /> Our Blog
         </span>
-        <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4" style={{ color: 'var(--color-primary)' }}>
+        <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4" style={{ color: '#0a0a0a' }}>
           Beauty Insights &amp; Skincare Tips
         </h1>
         <p className="text-gray-500 max-w-xl mx-auto text-lg leading-relaxed">
@@ -109,7 +109,7 @@ export default async function BlogListingPage({
                       <span className="flex items-center gap-1"><Calendar size={11} />{formatDate(posts[0].publishedAt)}</span>
                     )}
                   </div>
-                  <span className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--color-primary)' }}>
+                  <span className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: '#0a0a0a' }}>
                     Read Article <ArrowRight size={14} className="group-hover:translate-x-1.5 transition-transform" />
                   </span>
                 </div>
@@ -186,7 +186,7 @@ export default async function BlogListingPage({
                       ? 'border-transparent text-white'
                       : 'border-gray-200 hover:bg-gray-50 text-gray-700'
                   }`}
-                  style={p === page ? { backgroundColor: 'var(--color-primary)' } : undefined}
+                  style={p === page ? { backgroundColor: '#0a0a0a' } : undefined}
                 >
                   {p}
                 </Link>

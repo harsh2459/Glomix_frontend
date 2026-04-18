@@ -9,9 +9,7 @@ import { ISiteSettings } from '../../types';
 import { cn } from '../../lib/utils';
 import CartDrawer from './CartDrawer';
 
-interface HeaderProps {
-  settings: ISiteSettings | null;
-}
+interface HeaderProps { settings: ISiteSettings | null; }
 
 const DEFAULT_NAV_LINKS = [
   { href: '/products', label: 'All Products' },
@@ -22,42 +20,35 @@ const DEFAULT_NAV_LINKS = [
 ];
 
 export default function Header({ settings }: HeaderProps) {
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isScrolled, setIsScrolled]   = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchOpen, setSearchOpen]   = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedMobileModals, setExpandedMobileModals] = useState<string[]>([]);
   const { getTotalItems, openCart } = useCartStore();
   const { user } = useAuthStore();
   const pathname = usePathname();
-  const router = useRouter();
+  const router   = useRouter();
   const totalItems = getTotalItems();
 
-  // Use DB nav links if available, otherwise fall back to defaults
   const navLinks = (settings?.navLinks && settings.navLinks.length > 0)
-    ? [...settings.navLinks].sort((a, b) => a.order - b.order).map(l => ({ 
-        href: l.href, 
-        label: l.label,
-        subLinks: l.subLinks ? [...l.subLinks].sort((a,b) => a.order - b.order) : []
+    ? [...settings.navLinks].sort((a, b) => a.order - b.order).map(l => ({
+        href: l.href, label: l.label,
+        subLinks: l.subLinks ? [...l.subLinks].sort((a, b) => a.order - b.order) : [],
       }))
     : DEFAULT_NAV_LINKS;
 
-  const [expandedMobileModals, setExpandedMobileModals] = useState<string[]>([]);
-
-  const toggleMobileNav = (label: string) => {
-    setExpandedMobileModals(prev => 
-      prev.includes(label) ? prev.filter(l => l !== label) : [...prev, label]
-    );
-  };
+  const toggleMobileNav = (label: string) =>
+    setExpandedMobileModals(prev =>
+      prev.includes(label) ? prev.filter(l => l !== label) : [...prev, label]);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    const fn = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', fn, { passive: true });
+    return () => window.removeEventListener('scroll', fn);
   }, []);
 
-  useEffect(() => {
-    setIsMobileOpen(false);
-  }, [pathname]);
+  useEffect(() => { setIsMobileOpen(false); }, [pathname]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,13 +62,17 @@ export default function Header({ settings }: HeaderProps) {
   return (
     <>
       <div className="fixed top-0 left-0 right-0 z-50 w-full">
-        {/* Announcement Bar */}
+
+        {/* ── Announcement bar ── */}
         {settings?.announcementBar?.isEnabled && settings.announcementBar.text && (
           <div
-            className="text-sm py-2 px-4 text-center"
+            className="text-center py-2.5 px-4"
             style={{
-              backgroundColor: settings.announcementBar.backgroundColor || '#111827',
-              color: settings.announcementBar.textColor || '#ffffff',
+              background: settings.announcementBar.backgroundColor || '#0a0a0a',
+              color: settings.announcementBar.textColor || '#fafaf8',
+              fontSize: 12,
+              letterSpacing: '0.08em',
+              fontWeight: 300,
             }}
           >
             {settings.announcementBar.link ? (
@@ -90,184 +85,172 @@ export default function Header({ settings }: HeaderProps) {
           </div>
         )}
 
-      <header
-        className={cn(
-          'w-full bg-white border-b border-gray-200 transition-all duration-300',
-          isScrolled ? 'shadow-lg' : 'shadow-sm'
-        )}
-      >
-        <nav className="container">
-          <div className="flex items-center justify-between h-16 gap-4">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 shrink-0">
-              {settings?.logo ? (
-                <img src={settings.logo} alt={settings.siteName} className="h-10 w-auto" />
-              ) : (
-                <span className="font-heading text-2xl font-bold gradient-text">
-                  {settings?.siteName ?? 'Glomix'}
-                </span>
-              )}
-            </Link>
+        {/* ── Main header ── */}
+        <header
+          style={{
+            background: 'rgba(250,250,248,0.96)',
+            backdropFilter: 'blur(12px)',
+            borderBottom: '1px solid #e8e4dd',
+            boxShadow: isScrolled ? '0 4px 24px rgba(0,0,0,0.07)' : 'none',
+            transition: 'box-shadow 0.3s',
+          }}
+        >
+          <div className="container">
+            <div className="flex items-center justify-between h-[68px] gap-6">
 
-            {/* Desktop Nav */}
-            <ul className="hidden lg:flex items-center gap-6">
-              {navLinks.map((link) => (
-                <li key={link.href} className="relative group">
-                  <Link
-                    href={link.href}
-                    className={cn(
-                      'text-sm font-medium transition-colors hover:text-gray-800 flex items-center gap-1.5 py-5',
-                      pathname === link.href ? 'text-gray-800' : 'text-gray-700'
-                    )}
-                  >
-                    {link.label}
-                    {link.subLinks && link.subLinks.length > 0 && (
-                      <ChevronDown size={14} className="text-gray-400 group-hover:text-gray-800 transition-transform group-hover:-rotate-180" />
-                    )}
-                  </Link>
-
-                  {/* Dropdown Menu */}
-                  {link.subLinks && link.subLinks.length > 0 && (
-                    <div className="absolute top-full left-0 w-56 bg-white shadow-xl shadow-gray-200/50 rounded-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 translate-y-2 group-hover:translate-y-0 z-50">
-                      <ul className="flex flex-col py-2">
-                        {link.subLinks.map((subLink) => (
-                          <li key={subLink.href + subLink.label}>
-                            <Link
-                              href={subLink.href}
-                              className="block px-5 py-2.5 text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50/50 transition-colors"
-                            >
-                              {subLink.label}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-
-            {/* Actions */}
-            <div className="flex items-center gap-2">
-              {/* Search */}
-              {searchOpen ? (
-                <form onSubmit={handleSearch} className="flex items-center gap-2">
-                  <input
-                    id="header-search"
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search products..."
-                    className="input w-48 h-9 text-sm"
-                    autoFocus
-                  />
-                  <button type="button" onClick={() => setSearchOpen(false)} className="btn-ghost p-2">
-                    <X size={18} />
-                  </button>
-                </form>
-              ) : (
-                <button
-                  id="header-search-btn"
-                  onClick={() => setSearchOpen(true)}
-                  className="btn-ghost p-2"
-                  aria-label="Search"
-                >
-                  <Search size={20} />
-                </button>
-              )}
-
-              {/* Wishlist */}
-              <Link href="/account/wishlist" className="btn-ghost p-2 hidden sm:flex" aria-label="Wishlist">
-                <Heart size={20} />
+              {/* Logo */}
+              <Link href="/" className="shrink-0" style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: 26, fontWeight: 600, letterSpacing: '0.04em', color: '#0a0a0a', textDecoration: 'none' }}>
+                {settings?.logo
+                  ? <img src={settings.logo} alt={settings.siteName} className="h-9 w-auto" />
+                  : (settings?.siteName ?? 'Glomix')}
               </Link>
 
-              {/* Account */}
-              <Link
-                href={user ? '/account' : '/auth/login'}
-                className="btn-ghost p-2 hidden sm:flex"
-                aria-label="Account"
-              >
-                <User size={20} />
-              </Link>
-
-              {/* Cart */}
-              <button
-                id="cart-btn"
-                onClick={openCart}
-                className="btn-ghost p-2 relative"
-                aria-label="Cart"
-              >
-                <ShoppingBag size={20} />
-                {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-gray-700 text-white text-xs flex items-center justify-center font-bold animate-scale-in">
-                    {totalItems > 9 ? '9+' : totalItems}
-                  </span>
-                )}
-              </button>
-
-              {/* Mobile menu */}
-              <button
-                id="mobile-menu-btn"
-                onClick={() => setIsMobileOpen(!isMobileOpen)}
-                className="btn-ghost p-2 lg:hidden"
-                aria-label="Menu"
-              >
-                {isMobileOpen ? <X size={22} /> : <Menu size={22} />}
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Nav */}
-          {isMobileOpen && (
-            <div className="lg:hidden border-t border-gray-100 py-4 animate-fade-in">
-              <ul className="flex flex-col gap-1">
-                {navLinks.map((link) => (
-                  <li key={link.href}>
-                    {link.subLinks && link.subLinks.length > 0 ? (
-                      <div className="flex flex-col">
-                        <button
-                          onClick={() => toggleMobileNav(link.label)}
-                          className="flex items-center justify-between w-full px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                          {link.label}
-                          <ChevronDown size={18} className={cn("text-gray-400 transition-transform", expandedMobileModals.includes(link.label) && "-rotate-180 text-gray-800")} />
-                        </button>
-                        {expandedMobileModals.includes(link.label) && (
-                          <ul className="flex flex-col pl-6 pr-4 pb-2 border-l-2 border-gray-100 ml-4 mt-1">
-                            {link.subLinks.map((subLink) => (
-                              <li key={subLink.href + subLink.label}>
-                                <Link
-                                  href={subLink.href}
-                                  className="block py-2.5 text-sm text-gray-500 hover:text-indigo-600 transition-colors"
-                                >
-                                  {subLink.label}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    ) : (
-                      <Link
-                        href={link.href}
-                        className="block px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
+              {/* Desktop nav */}
+              <nav className="hidden lg:flex items-center gap-7">
+                {navLinks.map(link => {
+                  const isActive = pathname === link.href;
+                  return (
+                  <div key={link.href} className="relative group">
+                    <Link
+                      href={link.href}
+                      className="nav-link flex items-center gap-1 py-2"
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 400,
+                        letterSpacing: '0.06em',
+                        textTransform: 'uppercase',
+                        color: '#4a453f',
+                        textDecoration: 'none',
+                        position: 'relative',
+                      }}
+                    >
+                      <span className="nav-link-inner" style={{ position: 'relative', paddingBottom: 3 }}>
                         {link.label}
-                      </Link>
+                        {/* underline — grows on hover via CSS, always full-width if active */}
+                        <span
+                          className={isActive ? 'nav-underline nav-underline-active' : 'nav-underline'}
+                          style={{ position: 'absolute', left: 0, bottom: 0, height: 1, background: '#c8a96e', display: 'block' }}
+                        />
+                      </span>
+                      {link.subLinks && link.subLinks.length > 0 && (
+                        <ChevronDown size={13} style={{ color: '#b0a99e' }} className="group-hover:-rotate-180 transition-transform duration-200" />
+                      )}
+                    </Link>
+
+                    {link.subLinks && link.subLinks.length > 0 && (
+                      <div className="absolute top-full left-0 w-52 bg-white rounded-xl border opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 translate-y-2 transition-all duration-200 z-50"
+                        style={{ borderColor: '#e8e4dd', boxShadow: '0 12px 40px rgba(0,0,0,0.10)' }}>
+                        {link.subLinks.map(sub => (
+                          <Link key={sub.href + sub.label} href={sub.href}
+                            className="block px-5 py-2.5 text-sm transition-colors hover:bg-[#f4f1ec]"
+                            style={{ color: '#4a453f', fontSize: 13 }}>
+                            {sub.label}
+                          </Link>
+                        ))}
+                      </div>
                     )}
-                  </li>
-                ))}
-                  <li className="pt-2 border-t border-gray-100 mt-2 flex gap-3 px-4">
-                  <Link href={user ? '/account' : '/auth/login'} className="btn-outline flex-1 text-sm py-2">
-                    {user ? 'My Account' : 'Login / Register'}
-                  </Link>
-                </li>
-              </ul>
+                  </div>
+                  );
+                })}
+              </nav>
+
+              {/* Icons */}
+              <div className="flex items-center gap-1">
+                {/* Search */}
+                {searchOpen ? (
+                  <form onSubmit={handleSearch} className="flex items-center gap-2">
+                    <input
+                      type="text" value={searchQuery} autoFocus
+                      onChange={e => setSearchQuery(e.target.value)}
+                      placeholder="Search products..."
+                      className="outline-none text-sm px-3 py-1.5 rounded-lg border"
+                      style={{ borderColor: '#e8e4dd', width: 180, background: '#fafaf8' }}
+                    />
+                    <button type="button" onClick={() => setSearchOpen(false)}
+                      className="p-2 transition-colors" style={{ color: '#4a453f' }}>
+                      <X size={18} />
+                    </button>
+                  </form>
+                ) : (
+                  <button onClick={() => setSearchOpen(true)}
+                    className="p-2 transition-colors hover:text-black" style={{ color: '#4a453f', background: 'none', border: 'none', cursor: 'pointer' }}
+                    aria-label="Search">
+                    <Search size={18} />
+                  </button>
+                )}
+
+                <Link href="/account/wishlist" className="p-2 hidden sm:flex transition-colors hover:text-black" style={{ color: '#4a453f' }} aria-label="Wishlist">
+                  <Heart size={18} />
+                </Link>
+
+                <Link href={user ? '/account' : '/auth/login'} className="p-2 hidden sm:flex transition-colors hover:text-black" style={{ color: '#4a453f' }} aria-label="Account">
+                  <User size={18} />
+                </Link>
+
+                <button onClick={openCart} className="p-2 relative transition-colors hover:text-black" style={{ color: '#4a453f', background: 'none', border: 'none', cursor: 'pointer' }} aria-label="Cart">
+                  <ShoppingBag size={18} />
+                  {totalItems > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
+                      style={{ background: '#c8a96e', color: '#fff' }}>
+                      {totalItems > 9 ? '9+' : totalItems}
+                    </span>
+                  )}
+                </button>
+
+                <button onClick={() => setIsMobileOpen(!isMobileOpen)}
+                  className="p-2 lg:hidden transition-colors" style={{ color: '#4a453f', background: 'none', border: 'none', cursor: 'pointer' }}
+                  aria-label="Menu">
+                  {isMobileOpen ? <X size={22} /> : <Menu size={22} />}
+                </button>
+              </div>
             </div>
-          )}
-        </nav>
-      </header>
-      </div>  
+
+            {/* Mobile nav */}
+            {isMobileOpen && (
+              <div className="lg:hidden py-4 border-t" style={{ borderColor: '#e8e4dd' }}>
+                <ul className="flex flex-col gap-0.5">
+                  {navLinks.map(link => (
+                    <li key={link.href}>
+                      {link.subLinks && link.subLinks.length > 0 ? (
+                        <>
+                          <button onClick={() => toggleMobileNav(link.label)}
+                            className="flex items-center justify-between w-full px-4 py-3 rounded-lg text-sm transition-colors"
+                            style={{ color: '#4a453f', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: 12 }}>
+                            {link.label}
+                            <ChevronDown size={16} className={cn('transition-transform', expandedMobileModals.includes(link.label) && '-rotate-180')} />
+                          </button>
+                          {expandedMobileModals.includes(link.label) && (
+                            <ul className="pl-6 pb-2">
+                              {link.subLinks.map(sub => (
+                                <li key={sub.href + sub.label}>
+                                  <Link href={sub.href} className="block py-2 text-sm" style={{ color: '#4a453f' }}>{sub.label}</Link>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </>
+                      ) : (
+                        <Link href={link.href}
+                          className="block px-4 py-3 rounded-lg text-sm transition-colors hover:bg-[#f4f1ec]"
+                          style={{ color: '#4a453f', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: 12 }}>
+                          {link.label}
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                  <li className="pt-3 border-t mt-2 px-4" style={{ borderColor: '#e8e4dd' }}>
+                    <Link href={user ? '/account' : '/auth/login'}
+                      className="block text-center py-2.5 rounded-lg text-sm font-medium border transition-colors"
+                      style={{ borderColor: '#e8e4dd', color: '#0a0a0a' }}>
+                      {user ? 'My Account' : 'Login / Register'}
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
+        </header>
+      </div>
 
       <CartDrawer />
     </>

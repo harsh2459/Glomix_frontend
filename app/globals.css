@@ -234,6 +234,30 @@ img, video { max-width: 100%; display: block; }
 .swiper-pagination-bullet-active { background: var(--color-primary) !important; }
 .swiper-button-prev, .swiper-button-next { color: var(--color-primary) !important; }
 
+/* ── Product detail layout ────────────────────────────────────── */
+.pdp-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: start;
+}
+.pdp-reviews-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.pdp-rating-summary {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 48px;
+}
+@media (max-width: 900px) {
+  .pdp-layout { grid-template-columns: 1fr; gap: 40px; }
+  .pdp-gallery-sticky { position: static !important; }
+  .pdp-reviews-grid { grid-template-columns: 1fr; }
+  .pdp-rating-summary { grid-template-columns: 1fr; gap: 24px; }
+}
+
 /* ── Responsive grid helpers ──────────────────────────────────── */
 .grid-products {
   display: grid;
@@ -343,4 +367,16 @@ img, video { max-width: 100%; display: block; }
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
   letter-spacing: 0.03em;
+}
+
+/* ── Nav link hover underline animation ── */
+.nav-underline {
+  width: 0;
+  transition: width 0.3s ease;
+}
+.nav-underline-active {
+  width: 100%;
+}
+.nav-link:hover .nav-underline {
+  width: 100%;
 }

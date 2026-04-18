@@ -146,7 +146,7 @@ export default async function BlogDetailPage({
         )}
 
         {/* ── Title ── */}
-        <h1 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-5" style={{ color: 'var(--color-primary)' }}>
+        <h1 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-5" style={{ color: '#0a0a0a' }}>
           {post.title}
         </h1>
 
