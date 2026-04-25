@@ -12,15 +12,9 @@ import { apiPost } from '../../../lib/api';
 import toast from 'react-hot-toast';
 
 interface ShippingForm {
-  fullName: string;
-  phone: string;
-  email: string;
-  addressLine1: string;
-  addressLine2: string;
-  city: string;
-  state: string;
-  pincode: string;
-  country: string;
+  fullName: string; phone: string; email: string;
+  addressLine1: string; addressLine2: string;
+  city: string; state: string; pincode: string; country: string;
 }
 
 const INDIAN_STATES = [
@@ -35,38 +29,25 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { items, getSubtotal, clearCart } = useCartStore();
   const { user } = useAuthStore();
-  const subtotal = getSubtotal();
+  const subtotal    = getSubtotal();
   const shippingFee = subtotal >= 499 ? 0 : 79;
-  const total = subtotal + shippingFee;
+  const total       = subtotal + shippingFee;
   const [paymentMethod, setPaymentMethod] = useState<'razorpay' | 'cod'>('razorpay');
   const [couponCode, setCouponCode] = useState('');
-  const [discount, setDiscount] = useState(0);
+  const [discount, setDiscount]     = useState(0);
   const [couponLoading, setCouponLoading] = useState(false);
-  const [placing, setPlacing] = useState(false);
-  const [step, setStep] = useState<'shipping' | 'payment' | 'success'>('shipping');
-  const [orderId, setOrderId] = useState('');
+  const [placing, setPlacing]       = useState(false);
+  const [step, setStep]             = useState<'shipping' | 'payment' | 'success'>('shipping');
+  const [orderId, setOrderId]       = useState('');
 
   const [form, setForm] = useState<ShippingForm>({
-    fullName: user?.name ?? '',
-    phone: user?.phone ?? '',
-    email: user?.email ?? '',
-    addressLine1: '',
-    addressLine2: '',
-    city: '',
-    state: '',
-    pincode: '',
-    country: 'India',
+    fullName: user?.name ?? '', phone: user?.phone ?? '', email: user?.email ?? '',
+    addressLine1: '', addressLine2: '', city: '', state: '', pincode: '', country: 'India',
   });
 
   useEffect(() => {
     if (user) {
-      setForm(f => ({
-        ...f,
-        fullName: user.name || f.fullName,
-        phone: user.phone || f.phone,
-        email: user.email || f.email,
-      }));
-      // Pre-fill default address if available
+      setForm(f => ({ ...f, fullName: user.name || f.fullName, phone: user.phone || f.phone, email: user.email || f.email }));
       const defaultAddr = user.addresses?.find(a => a.isDefault) ?? user.addresses?.[0];
       if (defaultAddr) {
         setForm(f => ({
@@ -81,9 +62,7 @@ export default function CheckoutPage() {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (items.length === 0 && step !== 'success') router.replace('/cart');
-  }, [items, step, router]);
+  useEffect(() => { if (items.length === 0 && step !== 'success') router.replace('/cart'); }, [items, step, router]);
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -95,18 +74,13 @@ export default function CheckoutPage() {
     } catch {
       toast.error('Invalid or expired coupon code');
       setDiscount(0);
-    } finally {
-      setCouponLoading(false);
-    }
+    } finally { setCouponLoading(false); }
   };
 
   const validateShipping = () => {
-    const required: (keyof ShippingForm)[] = ['fullName', 'phone', 'email', 'addressLine1', 'city', 'state', 'pincode'];
+    const required: (keyof ShippingForm)[] = ['fullName','phone','email','addressLine1','city','state','pincode'];
     for (const field of required) {
-      if (!form[field].trim()) {
-        toast.error(`Please fill in ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
-        return false;
-      }
+      if (!form[field].trim()) { toast.error(`Please fill in ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`); return false; }
     }
     if (!/^\d{10}$/.test(form.phone)) { toast.error('Enter a valid 10-digit phone number'); return false; }
     if (!/^\d{6}$/.test(form.pincode)) { toast.error('Enter a valid 6-digit pincode'); return false; }
@@ -114,37 +88,22 @@ export default function CheckoutPage() {
     return true;
   };
 
-  const loadRazorpay = (): Promise<boolean> => {
-    return new Promise(resolve => {
-      if ((window as any).Razorpay) { resolve(true); return; }
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
-    });
-  };
+  const loadRazorpay = (): Promise<boolean> => new Promise(resolve => {
+    if ((window as any).Razorpay) { resolve(true); return; }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
 
   const placeOrder = async () => {
     if (!validateShipping()) return;
     setPlacing(true);
     try {
       const orderPayload = {
-        items: items.map(item => ({
-          product: item.product._id,
-          quantity: item.quantity,
-          variant: item.variant,
-        })),
-        shippingAddress: {
-          fullName: form.fullName,
-          phone: form.phone,
-          addressLine1: form.addressLine1,
-          addressLine2: form.addressLine2,
-          city: form.city,
-          state: form.state,
-          pincode: form.pincode,
-          country: form.country,
-        },
+        items: items.map(item => ({ product: item.product._id, quantity: item.quantity, variant: item.variant })),
+        shippingAddress: { fullName: form.fullName, phone: form.phone, addressLine1: form.addressLine1, addressLine2: form.addressLine2, city: form.city, state: form.state, pincode: form.pincode, country: form.country },
         paymentMethod,
         couponCode: couponCode || undefined,
         customerEmail: form.email,
@@ -153,20 +112,12 @@ export default function CheckoutPage() {
       if (paymentMethod === 'razorpay') {
         const loaded = await loadRazorpay();
         if (!loaded) { toast.error('Payment gateway failed to load. Try again.'); setPlacing(false); return; }
-
-        const rpOrder = await apiPost<{ id: string; amount: number; currency: string; key: string }>('/payments/create-order', {
-          amount: total - discount,
-        });
-
+        const rpOrder = await apiPost<{ id: string; amount: number; currency: string; key: string }>('/payments/create-order', { amount: total - discount });
         const options = {
-          key: rpOrder.key,
-          amount: rpOrder.amount,
-          currency: rpOrder.currency,
-          name: 'Glomix',
-          description: 'Natural Beauty Products',
-          order_id: rpOrder.id,
+          key: rpOrder.key, amount: rpOrder.amount, currency: rpOrder.currency,
+          name: 'Glomix', description: 'Natural Beauty Products', order_id: rpOrder.id,
           prefill: { name: form.fullName, email: form.email, contact: form.phone },
-          theme: { color: '#111827' },
+          theme: { color: '#0a0a0a' },
           handler: async (response: any) => {
             try {
               const confirmed = await apiPost<{ orderNumber: string }>('/orders', {
@@ -175,132 +126,169 @@ export default function CheckoutPage() {
                 razorpayPaymentId: response.razorpay_payment_id,
                 razorpaySignature: response.razorpay_signature,
               });
-              setOrderId(confirmed.orderNumber);
-              clearCart();
-              setStep('success');
+              setOrderId(confirmed.orderNumber); clearCart(); setStep('success');
             } catch { toast.error('Order confirmation failed. Contact support.'); }
           },
           modal: { ondismiss: () => setPlacing(false) },
         };
-
         const rzp = new (window as any).Razorpay(options);
         rzp.open();
         return;
       }
-
-      // COD
       const order = await apiPost<{ orderNumber: string }>('/orders', orderPayload);
-      setOrderId(order.orderNumber);
-      clearCart();
-      setStep('success');
+      setOrderId(order.orderNumber); clearCart(); setStep('success');
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? 'Failed to place order. Please try again.');
-    } finally {
-      setPlacing(false);
-    }
+    } finally { setPlacing(false); }
   };
 
   if (step === 'success') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-3xl border border-gray-100 p-10 max-w-md w-full text-center shadow-lg">
-          <div className="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-6">
-            <Check size={40} className="text-green-500" />
+      <div style={{ minHeight: '100vh', background: 'var(--bg-alt)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.5rem' }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-2xl)', padding: '2.5rem', maxWidth: 440, width: '100%', textAlign: 'center', boxShadow: 'var(--shadow-deep)' }}>
+          <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--success-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+            <Check size={34} style={{ color: 'var(--success)' }} />
           </div>
-          <h1 className="font-heading text-3xl font-bold text-gray-900 mb-2">Order Placed!</h1>
-          <p className="text-gray-500 mb-2">Thank you for your purchase</p>
-          {orderId && <p className="text-sm font-semibold text-gray-700 bg-gray-50 rounded-lg px-4 py-2 mb-6">Order: #{orderId}</p>}
-          <p className="text-sm text-gray-500 mb-8">You&apos;ll receive a confirmation email shortly. We&apos;ll notify you when your order ships.</p>
-          <div className="flex flex-col gap-3">
-            <Link href="/account/orders" className="btn-primary w-full">Track My Orders</Link>
-            <Link href="/products" className="btn-outline w-full">Continue Shopping</Link>
+          <h1 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.875rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.5rem' }}>Order Placed!</h1>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '0.75rem', fontSize: 14 }}>Thank you for your purchase</p>
+          {orderId && (
+            <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', background: 'var(--bg-alt)', borderRadius: 'var(--radius)', padding: '8px 16px', display: 'inline-block', marginBottom: '1.5rem' }}>
+              Order: #{orderId}
+            </p>
+          )}
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: '2rem', lineHeight: 1.65 }}>
+            You&apos;ll receive a confirmation email shortly. We&apos;ll notify you when your order ships.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <Link href="/account/orders" className="btn-primary" style={{ justifyContent: 'center' }}>Track My Orders</Link>
+            <Link href="/products" className="btn-outline" style={{ justifyContent: 'center' }}>Continue Shopping</Link>
           </div>
         </div>
       </div>
     );
   }
 
+  const inputStyle: React.CSSProperties = {
+    width: '100%', padding: '0.7rem 1rem',
+    background: 'var(--surface)', border: '1.5px solid var(--border-strong)',
+    borderRadius: 'var(--radius)', color: 'var(--text)',
+    fontSize: 13, outline: 'none', fontFamily: 'inherit',
+    transition: 'border-color 0.2s ease',
+  };
+  const labelStyle: React.CSSProperties = {
+    display: 'block', fontSize: 12, fontWeight: 500,
+    color: 'var(--text-sub)', marginBottom: 6, letterSpacing: '0.02em',
+  };
+  const sectionCardStyle: React.CSSProperties = {
+    background: 'var(--surface)', border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-xl)', padding: '1.5rem',
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container py-10">
+    <div style={{ minHeight: '100vh', background: 'var(--bg-alt)' }}>
+      <div className="container" style={{ paddingTop: '2.5rem', paddingBottom: '4rem' }}>
+
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-1.5 text-xs text-gray-500 mb-8">
-          <Link href="/cart" className="hover:text-gray-800 transition">Cart</Link>
-          <ChevronRight size={12} />
-          <span className="text-gray-800 font-medium">Checkout</span>
+        <nav style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-muted)', marginBottom: '2rem' }}>
+          <Link href="/cart" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}>
+            Cart
+          </Link>
+          <ChevronRight size={11} />
+          <span style={{ color: 'var(--text)', fontWeight: 500 }}>Checkout</span>
         </nav>
 
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <Lock size={20} className="text-gray-400" />
-          <h1 className="font-heading text-2xl font-bold text-gray-900">Secure Checkout</h1>
+        {/* Title */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '2rem' }}>
+          <Lock size={18} style={{ color: 'var(--text-faint)' }} />
+          <h1 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.5rem', fontWeight: 600, color: 'var(--text)' }}>
+            Secure Checkout
+          </h1>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left: Form */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Shipping Details */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h2 className="font-heading text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
-                <Truck size={18} className="text-gray-400" /> Shipping Details
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }} className="lg:grid-cols-3">
+
+          {/* Left — Form */}
+          <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+
+            {/* Shipping */}
+            <div style={sectionCardStyle}>
+              <h2 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.0625rem', fontWeight: 600, color: 'var(--text)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Truck size={16} style={{ color: 'var(--text-faint)' }} /> Shipping Details
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 {[
-                  { name: 'fullName', label: 'Full Name', placeholder: 'Priya Sharma', col: 'sm:col-span-2' },
-                  { name: 'email', label: 'Email Address', placeholder: 'priya@example.com', type: 'email' },
-                  { name: 'phone', label: 'Phone Number', placeholder: '9876543210', type: 'tel' },
-                  { name: 'addressLine1', label: 'Address Line 1', placeholder: 'Flat/House No., Street', col: 'sm:col-span-2' },
-                  { name: 'addressLine2', label: 'Address Line 2 (Optional)', placeholder: 'Landmark, Colony', col: 'sm:col-span-2' },
-                  { name: 'city', label: 'City', placeholder: 'Mumbai' },
-                  { name: 'pincode', label: 'Pincode', placeholder: '400001', type: 'tel' },
+                  { name: 'fullName',     label: 'Full Name',              placeholder: 'Priya Sharma',        span: true },
+                  { name: 'email',        label: 'Email Address',          placeholder: 'priya@example.com',   type: 'email' },
+                  { name: 'phone',        label: 'Phone Number',           placeholder: '9876543210',          type: 'tel' },
+                  { name: 'addressLine1', label: 'Address Line 1',         placeholder: 'Flat/House No., Street', span: true },
+                  { name: 'addressLine2', label: 'Address Line 2 (Optional)', placeholder: 'Landmark, Colony', span: true },
+                  { name: 'city',         label: 'City',                   placeholder: 'Mumbai' },
+                  { name: 'pincode',      label: 'Pincode',                placeholder: '400001',              type: 'tel' },
                 ].map(field => (
-                  <div key={field.name} className={field.col ?? ''}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">{field.label}</label>
+                  <div key={field.name} style={{ gridColumn: field.span ? 'span 2' : 'span 1' }}>
+                    <label style={labelStyle}>{field.label}</label>
                     <input
                       type={field.type ?? 'text'}
                       value={form[field.name as keyof ShippingForm]}
                       onChange={e => setForm(f => ({ ...f, [field.name]: e.target.value }))}
                       placeholder={field.placeholder}
-                      className="input"
+                      style={inputStyle}
+                      onFocus={e => (e.currentTarget as HTMLInputElement).style.borderColor = 'var(--text)'}
+                      onBlur={e => (e.currentTarget as HTMLInputElement).style.borderColor = 'var(--border-strong)'}
                     />
                   </div>
                 ))}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">State</label>
-                  <select value={form.state} onChange={e => setForm(f => ({ ...f, state: e.target.value }))} className="input">
+                  <label style={labelStyle}>State</label>
+                  <select value={form.state} onChange={e => setForm(f => ({ ...f, state: e.target.value }))} style={inputStyle}>
                     <option value="">Select State</option>
                     {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Country</label>
-                  <input type="text" value={form.country} readOnly className="input bg-gray-50 cursor-not-allowed" />
+                  <label style={labelStyle}>Country</label>
+                  <input type="text" value={form.country} readOnly style={{ ...inputStyle, background: 'var(--bg-alt)', cursor: 'not-allowed' }} />
                 </div>
               </div>
             </div>
 
-            {/* Payment Method */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h2 className="font-heading text-lg font-bold text-gray-900 mb-5">Payment Method</h2>
-              <div className="space-y-3">
+            {/* Payment */}
+            <div style={sectionCardStyle}>
+              <h2 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.0625rem', fontWeight: 600, color: 'var(--text)', marginBottom: '1.25rem' }}>
+                Payment Method
+              </h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {[
                   { value: 'razorpay', label: 'Pay Online', sub: 'UPI, Cards, Net Banking, Wallets', badge: 'Recommended' },
-                  { value: 'cod', label: 'Cash on Delivery', sub: 'Pay when you receive your order', badge: null },
+                  { value: 'cod',      label: 'Cash on Delivery', sub: 'Pay when you receive your order', badge: null },
                 ].map(method => (
-                  <label key={method.value}
-                    className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition ${
-                      paymentMethod === method.value ? 'border-gray-900 bg-gray-50' : 'border-gray-100 hover:border-gray-300'
-                    }`}>
+                  <label
+                    key={method.value}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px',
+                      borderRadius: 'var(--radius-lg)', cursor: 'pointer',
+                      border: `2px solid ${paymentMethod === method.value ? 'var(--text)' : 'var(--border)'}`,
+                      background: paymentMethod === method.value ? 'var(--bg-alt)' : 'transparent',
+                      transition: 'border-color 0.2s, background 0.2s',
+                    }}
+                  >
                     <input type="radio" name="payment" value={method.value}
                       checked={paymentMethod === method.value}
                       onChange={() => setPaymentMethod(method.value as 'razorpay' | 'cod')}
-                      className="w-4 h-4 accent-gray-900" />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-gray-900">{method.label}</span>
-                        {method.badge && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">{method.badge}</span>}
+                      style={{ width: 15, height: 15, accentColor: 'var(--text)', flexShrink: 0 }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{method.label}</span>
+                        {method.badge && (
+                          <span style={{ fontSize: 10, background: 'var(--success-bg)', color: 'var(--success)', padding: '2px 8px', borderRadius: 9999, fontWeight: 600 }}>
+                            {method.badge}
+                          </span>
+                        )}
                       </div>
-                      <p className="text-xs text-gray-500 mt-0.5">{method.sub}</p>
+                      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{method.sub}</p>
                     </div>
                   </label>
                 ))}
@@ -308,78 +296,88 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Right: Summary */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 sticky top-24 space-y-5">
-              <h2 className="font-heading text-lg font-bold text-gray-900">Order Summary</h2>
+          {/* Right — Summary */}
+          <div>
+            <div style={{ ...sectionCardStyle, position: 'sticky', top: 88 }}>
+              <h2 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.125rem', fontWeight: 600, color: 'var(--text)', marginBottom: '1.25rem' }}>
+                Order Summary
+              </h2>
 
               {/* Items */}
-              <div className="space-y-3 max-h-52 overflow-y-auto pr-1">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxHeight: 210, overflowY: 'auto', marginBottom: '1.25rem' }}>
                 {items.map((item, idx) => (
-                  <div key={`${item.product._id}-${idx}`} className="flex gap-3">
-                    <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-gray-50 shrink-0">
-                      {item.product.images[0] && (
-                        <Image src={item.product.images[0]} alt={item.product.name} fill className="object-cover" sizes="56px" />
-                      )}
-                      <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gray-800 text-white text-xs rounded-full flex items-center justify-center font-bold">{item.quantity}</span>
+                  <div key={`${item.product._id}-${idx}`} style={{ display: 'flex', gap: 10 }}>
+                    <div style={{ position: 'relative', width: 52, height: 52, borderRadius: 'var(--radius)', overflow: 'hidden', background: 'var(--bg-alt)', flexShrink: 0 }}>
+                      {item.product.images[0] && <Image src={item.product.images[0]} alt={item.product.name} fill style={{ objectFit: 'cover' }} sizes="52px" />}
+                      <span style={{ position: 'absolute', top: -4, right: -4, width: 18, height: 18, background: 'var(--text)', color: 'var(--ink-text)', fontSize: 9, fontWeight: 700, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {item.quantity}
+                      </span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 line-clamp-1">{item.product.name}</p>
-                      {item.variant && <p className="text-xs text-gray-400">{item.variant.value}</p>}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', lineHeight: 1.35 }} className="line-clamp-1">{item.product.name}</p>
+                      {item.variant && <p style={{ fontSize: 11, color: 'var(--text-faint)' }}>{item.variant.value}</p>}
                     </div>
-                    <span className="text-sm font-semibold text-gray-900 shrink-0">{formatPrice((item.product.salePrice || item.product.price) * item.quantity)}</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', flexShrink: 0 }}>
+                      {formatPrice((item.product.salePrice || item.product.price) * item.quantity)}
+                    </span>
                   </div>
                 ))}
               </div>
 
               {/* Coupon */}
-              <div className="border-t border-gray-100 pt-4">
-                <p className="text-sm font-medium text-gray-700 mb-2">Have a coupon?</p>
-                <div className="flex gap-2">
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1rem', marginBottom: '1rem' }}>
+                <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-sub)', marginBottom: 8 }}>Have a coupon?</p>
+                <div style={{ display: 'flex', gap: 8 }}>
                   <input type="text" value={couponCode} onChange={e => setCouponCode(e.target.value.toUpperCase())}
-                    placeholder="ENTER CODE" className="input text-sm h-10 flex-1 uppercase tracking-wider" />
+                    placeholder="ENTER CODE"
+                    style={{ ...inputStyle, flex: 1, height: 38, fontSize: 12, letterSpacing: '0.06em', borderRadius: 'var(--radius)', padding: '0 12px' }}
+                    onFocus={e => (e.currentTarget as HTMLInputElement).style.borderColor = 'var(--text)'}
+                    onBlur={e => (e.currentTarget as HTMLInputElement).style.borderColor = 'var(--border-strong)'}
+                  />
                   <button onClick={handleApplyCoupon} disabled={couponLoading || !couponCode}
-                    className="btn-outline text-sm px-4 h-10 shrink-0 disabled:opacity-50">
+                    style={{ flexShrink: 0, height: 38, padding: '0 14px', background: 'var(--text)', color: 'var(--ink-text)', border: 'none', borderRadius: 'var(--radius)', fontSize: 12, fontWeight: 500, cursor: couponLoading || !couponCode ? 'not-allowed' : 'pointer', opacity: couponLoading || !couponCode ? 0.5 : 1, fontFamily: 'inherit', transition: 'opacity 0.2s' }}>
                     {couponLoading ? '...' : 'Apply'}
                   </button>
                 </div>
                 {discount > 0 && (
-                  <p className="text-xs text-green-600 font-semibold mt-1.5">✓ Coupon applied — {formatPrice(discount)} off!</p>
+                  <p style={{ fontSize: 11, color: 'var(--success)', fontWeight: 500, marginTop: 6 }}>✓ Coupon applied — {formatPrice(discount)} off!</p>
                 )}
               </div>
 
               {/* Totals */}
-              <div className="border-t border-gray-100 pt-4 space-y-2.5">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Subtotal</span>
-                  <span className="font-medium">{formatPrice(subtotal)}</span>
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: 9, marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Subtotal</span>
+                  <span style={{ fontWeight: 500, color: 'var(--text)' }}>{formatPrice(subtotal)}</span>
                 </div>
                 {discount > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-green-600">Coupon Discount</span>
-                    <span className="text-green-600 font-medium">-{formatPrice(discount)}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                    <span style={{ color: 'var(--success)' }}>Coupon Discount</span>
+                    <span style={{ color: 'var(--success)', fontWeight: 500 }}>-{formatPrice(discount)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Shipping</span>
-                  <span className={shippingFee === 0 ? 'text-green-600 font-medium' : 'font-medium'}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Shipping</span>
+                  <span style={{ fontWeight: 500, color: shippingFee === 0 ? 'var(--success)' : 'var(--text)' }}>
                     {shippingFee === 0 ? 'FREE' : formatPrice(shippingFee)}
                   </span>
                 </div>
-                <div className="flex justify-between font-bold text-lg border-t border-gray-100 pt-2.5">
-                  <span>Total</span>
-                  <span>{formatPrice(total - discount)}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: 10 }}>
+                  <span style={{ fontWeight: 600, color: 'var(--text)' }}>Total</span>
+                  <span style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.125rem', fontWeight: 600, color: 'var(--text)' }}>
+                    {formatPrice(total - discount)}
+                  </span>
                 </div>
               </div>
 
               <button onClick={placeOrder} disabled={placing}
-                className="btn-primary w-full py-3.5 flex items-center justify-center gap-2 disabled:opacity-60">
-                <Lock size={16} />
+                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '0.875rem', background: placing ? 'var(--ink-hover)' : 'var(--ink)', color: 'var(--ink-text)', border: 'none', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 500, letterSpacing: '0.04em', cursor: placing ? 'not-allowed' : 'pointer', opacity: placing ? 0.7 : 1, fontFamily: 'inherit', transition: 'all 0.2s' }}>
+                <Lock size={14} />
                 {placing ? 'Processing...' : paymentMethod === 'cod' ? 'Place Order' : 'Pay Now'}
               </button>
 
-              <p className="text-xs text-gray-400 text-center flex items-center justify-center gap-1">
-                <Lock size={10} /> 256-bit SSL secured checkout
+              <p style={{ fontSize: 11, color: 'var(--text-faint)', textAlign: 'center', marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                <Lock size={9} /> 256-bit SSL secured checkout
               </p>
             </div>
           </div>

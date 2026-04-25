@@ -21,7 +21,7 @@ export default function RegisterPage() {
     try {
       const data = await apiPost<{ user: unknown }>('/auth/register', form);
       setUser(data.user as Parameters<typeof setUser>[0]);
-      toast.success('Account created! Welcome to Glomix 🌸');
+      toast.success('Account created! Welcome to Glomix');
       router.push('/account');
     } catch (err: unknown) {
       toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Registration failed');
@@ -29,41 +29,68 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="section min-h-[80vh] flex items-center justify-center">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="font-heading text-3xl font-bold mb-2">Join Glomix</h1>
-          <p className="text-gray-400">Create an account and start your beauty journey</p>
+    <div style={{ minHeight: '80vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem 1.5rem' }}>
+      <div style={{ width: '100%', maxWidth: 420 }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <h1 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.875rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.5rem' }}>
+            Join Glomix
+          </h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Create an account and start your beauty journey</p>
         </div>
-        <form onSubmit={handleSubmit} className="card p-8 space-y-5">
+
+        <form onSubmit={handleSubmit} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div>
-            <label htmlFor="reg-name" className="block text-sm font-medium text-gray-300 mb-1.5">Full Name</label>
-            <input id="reg-name" type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="input" placeholder="Your Name" required autoFocus />
+            <label htmlFor="reg-name" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--text-sub)', marginBottom: 6 }}>Full Name</label>
+            <input id="reg-name" type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="input" placeholder="Your Name" required autoFocus />
           </div>
+
           <div>
-            <label htmlFor="reg-email" className="block text-sm font-medium text-gray-300 mb-1.5">Email</label>
-            <input id="reg-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="input" placeholder="you@example.com" required />
+            <label htmlFor="reg-email" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--text-sub)', marginBottom: 6 }}>Email</label>
+            <input id="reg-email" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className="input" placeholder="you@example.com" required />
           </div>
+
           <div>
-            <label htmlFor="reg-phone" className="block text-sm font-medium text-gray-300 mb-1.5">Phone <span className="text-gray-500">(optional)</span></label>
-            <input id="reg-phone" type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="input" placeholder="+91 98765 43210" />
+            <label htmlFor="reg-phone" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--text-sub)', marginBottom: 6 }}>
+              Phone <span style={{ color: 'var(--text-faint)', fontWeight: 400 }}>(optional)</span>
+            </label>
+            <input id="reg-phone" type="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className="input" placeholder="+91 98765 43210" />
           </div>
+
           <div>
-            <label htmlFor="reg-password" className="block text-sm font-medium text-gray-300 mb-1.5">Password</label>
-            <div className="relative">
-              <input id="reg-password" type={showPassword ? 'text' : 'password'} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="input pr-11" placeholder="Min. 6 characters" required minLength={6} />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <label htmlFor="reg-password" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--text-sub)', marginBottom: 6 }}>Password</label>
+            <div style={{ position: 'relative' }}>
+              <input
+                id="reg-password"
+                type={showPassword ? 'text' : 'password'}
+                value={form.password}
+                onChange={e => setForm({ ...form, password: e.target.value })}
+                className="input" style={{ paddingRight: '2.75rem' }}
+                placeholder="Min. 6 characters" required minLength={6}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-faint)', display: 'flex', padding: 0 }}
+              >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </div>
-          <button id="reg-submit" type="submit" disabled={loading} className="btn-primary w-full py-3 gap-2 disabled:opacity-60">
+
+          <button
+            id="reg-submit" type="submit" disabled={loading}
+            className="btn-primary"
+            style={{ width: '100%', justifyContent: 'center', padding: '0.875rem', gap: 8, opacity: loading ? 0.6 : 1 }}
+          >
             <UserPlus size={16} />
             {loading ? 'Creating Account...' : 'Create Account'}
           </button>
-          <p className="text-center text-sm text-gray-400">
+
+          <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
             Already have an account?{' '}
-            <Link href="/auth/login" className="text-gray-600 hover:text-gray-500 font-medium">Sign in</Link>
+            <Link href="/auth/login" style={{ color: 'var(--text-sub)', fontWeight: 500, textDecoration: 'none' }}>
+              Sign in
+            </Link>
           </p>
         </form>
       </div>

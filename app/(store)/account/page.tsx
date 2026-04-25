@@ -8,14 +8,22 @@ import { IOrder } from '../../../types';
 import { apiGet } from '../../../lib/api';
 import { formatPrice } from '../../../lib/utils';
 
-const STATUS_STYLES: Record<string, string> = {
-  pending:    'bg-yellow-50 text-yellow-700 border-yellow-200',
-  confirmed:  'bg-blue-50 text-blue-700 border-blue-200',
-  processing: 'bg-purple-50 text-purple-700 border-purple-200',
-  shipped:    'bg-indigo-50 text-indigo-700 border-indigo-200',
-  delivered:  'bg-green-50 text-green-700 border-green-200',
-  cancelled:  'bg-red-50 text-red-600 border-red-200',
-  refunded:   'bg-gray-50 text-gray-600 border-gray-200',
+// Maps order status → CSS class from globals.css
+const STATUS_CLASS: Record<string, string> = {
+  pending:    'status-pending',
+  confirmed:  'status-confirmed',
+  processing: 'status-processing',
+  shipped:    'status-shipped',
+  delivered:  'status-delivered',
+  cancelled:  'status-cancelled',
+  refunded:   'status-refunded',
+};
+
+const cardStyle: React.CSSProperties = {
+  background: 'var(--surface)',
+  border: '1px solid var(--border)',
+  borderRadius: 'var(--radius-xl)',
+  padding: '1.5rem',
 };
 
 export default function AccountDashboard() {
@@ -31,87 +39,103 @@ export default function AccountDashboard() {
   }, []);
 
   const quickLinks = [
-    { href: '/account/orders', label: 'My Orders', sub: 'Track and manage orders', icon: ShoppingBag, color: 'bg-blue-50 text-blue-600' },
-    { href: '/account/wishlist', label: 'Wishlist', sub: 'Saved products', icon: Heart, color: 'bg-pink-50 text-pink-600' },
-    { href: '/account/addresses', label: 'Addresses', sub: 'Manage delivery addresses', icon: MapPin, color: 'bg-green-50 text-green-600' },
+    { href: '/account/orders',    label: 'My Orders',  sub: 'Track and manage orders',     icon: ShoppingBag },
+    { href: '/account/wishlist',  label: 'Wishlist',   sub: 'Saved products',              icon: Heart },
+    { href: '/account/addresses', label: 'Addresses',  sub: 'Manage delivery addresses',   icon: MapPin },
   ];
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
       {/* Welcome */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6">
-        <h1 className="font-heading text-2xl font-bold text-gray-900 mb-1">
-          Welcome back, {user?.name?.split(' ')[0]}! 👋
+      <div style={cardStyle}>
+        <h1 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.5rem', fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
+          Welcome back, {user?.name?.split(' ')[0]}!
         </h1>
-        <p className="text-gray-500 text-sm">Manage your orders, wishlist, and account details</p>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Manage your orders, wishlist, and account details</p>
       </div>
 
       {/* Quick links */}
-      <div className="grid sm:grid-cols-3 gap-4">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
         {quickLinks.map(link => {
           const Icon = link.icon;
           return (
-            <Link key={link.href} href={link.href}
-              className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-gray-300 hover:shadow-sm transition group">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${link.color}`}>
-                <Icon size={20} />
+            <Link
+              key={link.href}
+              href={link.href}
+              style={{ ...cardStyle, textDecoration: 'none', display: 'block', transition: 'box-shadow 0.2s, border-color 0.2s' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-strong)'; (e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow-card)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.boxShadow = 'none'; }}
+            >
+              <div style={{ width: 38, height: 38, borderRadius: 'var(--radius)', background: 'var(--bg-alt)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12, color: 'var(--text)' }}>
+                <Icon size={18} />
               </div>
-              <p className="font-semibold text-gray-900 text-sm group-hover:text-gray-600 transition">{link.label}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{link.sub}</p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 3 }}>{link.label}</p>
+              <p style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>{link.sub}</p>
             </Link>
           );
         })}
       </div>
 
       {/* Recent orders */}
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="font-heading text-lg font-bold text-gray-900">Recent Orders</h2>
-          <Link href="/account/orders" className="text-sm text-gray-500 hover:text-gray-800 flex items-center gap-1">
-            View all <ChevronRight size={14} />
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)' }}>
+          <h2 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.0625rem', fontWeight: 600, color: 'var(--text)' }}>Recent Orders</h2>
+          <Link href="/account/orders" style={{ fontSize: 12, color: 'var(--text-muted)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3, transition: 'color 0.2s' }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}>
+            View all <ChevronRight size={13} />
           </Link>
         </div>
 
         {loading && (
-          <div className="p-6 space-y-3">
-            {[1,2,3].map(i => <div key={i} className="skeleton h-16 rounded-xl" />)}
+          <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 56, borderRadius: 'var(--radius-lg)' }} />)}
           </div>
         )}
 
         {!loading && recentOrders.length === 0 && (
-          <div className="text-center py-14">
-            <Package size={40} className="text-gray-200 mx-auto mb-3" />
-            <p className="text-gray-500 font-medium">No orders yet</p>
-            <p className="text-sm text-gray-400 mt-1 mb-5">Start shopping to see your orders here</p>
-            <Link href="/products" className="btn-primary text-sm px-6 py-2.5">Shop Now</Link>
+          <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem' }}>
+            <Package size={38} style={{ color: 'var(--bg-muted)', margin: '0 auto 12px' }} />
+            <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-sub)', marginBottom: 4 }}>No orders yet</p>
+            <p style={{ fontSize: 12, color: 'var(--text-faint)', marginBottom: '1.25rem' }}>Start shopping to see your orders here</p>
+            <Link href="/products" className="btn-primary" style={{ fontSize: 13, padding: '0.6rem 1.5rem' }}>Shop Now</Link>
           </div>
         )}
 
         {!loading && recentOrders.length > 0 && (
-          <div className="divide-y divide-gray-100">
-            {recentOrders.map(order => (
-              <Link key={order._id} href={`/account/orders/${order._id}`}
-                className="flex items-center justify-between p-5 hover:bg-gray-50 transition">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
-                    <ShoppingBag size={18} className="text-gray-500" />
+          <div>
+            {recentOrders.map((order, idx) => (
+              <Link
+                key={order._id}
+                href={`/account/orders/${order._id}`}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.5rem', borderBottom: idx < recentOrders.length - 1 ? '1px solid var(--border)' : 'none', textDecoration: 'none', transition: 'background 0.15s' }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--bg-alt)'}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 'var(--radius)', background: 'var(--bg-alt)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ShoppingBag size={16} style={{ color: 'var(--text-muted)' }} />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm text-gray-900">#{order.orderNumber}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <Clock size={11} className="text-gray-400" />
-                      <span className="text-xs text-gray-400">
+                    <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>#{order.orderNumber}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
+                      <Clock size={10} style={{ color: 'var(--text-faint)' }} />
+                      <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>
                         {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </span>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className="font-bold text-sm text-gray-900">{formatPrice(order.total)}</span>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${STATUS_STYLES[order.orderStatus] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
-                    {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <span style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>
+                    {formatPrice(order.total)}
                   </span>
-                  <ChevronRight size={16} className="text-gray-300" />
+                  <span className={`${STATUS_CLASS[order.orderStatus] ?? 'status-refunded'}`}
+                    style={{ fontSize: 10.5, fontWeight: 600, padding: '3px 10px', borderRadius: 9999, letterSpacing: '0.03em', textTransform: 'capitalize' }}>
+                    {order.orderStatus}
+                  </span>
+                  <ChevronRight size={14} style={{ color: 'var(--text-faint)' }} />
                 </div>
               </Link>
             ))}
@@ -120,18 +144,18 @@ export default function AccountDashboard() {
       </div>
 
       {/* Account info */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6">
-        <h2 className="font-heading text-lg font-bold text-gray-900 mb-4">Account Information</h2>
-        <div className="grid sm:grid-cols-2 gap-4">
+      <div style={cardStyle}>
+        <h2 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.0625rem', fontWeight: 600, color: 'var(--text)', marginBottom: '1rem' }}>Account Information</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
           {[
-            { label: 'Full Name', value: user?.name },
-            { label: 'Email', value: user?.email },
-            { label: 'Phone', value: user?.phone || 'Not added' },
-            { label: 'Member Since', value: user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : '—' },
+            { label: 'Full Name',     value: user?.name },
+            { label: 'Email',         value: user?.email },
+            { label: 'Phone',         value: user?.phone || 'Not added' },
+            { label: 'Member Since',  value: user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : '—' },
           ].map(({ label, value }) => (
-            <div key={label} className="bg-gray-50 rounded-xl px-4 py-3">
-              <p className="text-xs font-medium text-gray-500 mb-1">{label}</p>
-              <p className="text-sm font-semibold text-gray-900">{value}</p>
+            <div key={label} style={{ background: 'var(--bg-alt)', borderRadius: 'var(--radius)', padding: '10px 14px' }}>
+              <p style={{ fontSize: 10.5, fontWeight: 500, color: 'var(--text-faint)', marginBottom: 4, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{label}</p>
+              <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{value}</p>
             </div>
           ))}
         </div>

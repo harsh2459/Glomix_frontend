@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowLeft, ArrowRight, Truck, Shield } from 'lucide-react';
@@ -9,119 +8,134 @@ import { formatPrice } from '../../../lib/utils';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getSubtotal, getTotalItems } = useCartStore();
-  const subtotal = getSubtotal();
+  const subtotal   = getSubtotal();
   const totalItems = getTotalItems();
   const freeShippingThreshold = 499;
-  const shippingProgress = Math.min((subtotal / freeShippingThreshold) * 100, 100);
+  const shippingProgress      = Math.min((subtotal / freeShippingThreshold) * 100, 100);
   const qualifiesForFreeShipping = subtotal >= freeShippingThreshold;
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center py-24 px-4">
-          <ShoppingBag size={64} className="text-gray-200 mx-auto mb-6" />
-          <h1 className="font-heading text-3xl font-bold text-gray-900 mb-3">Your cart is empty</h1>
-          <p className="text-gray-500 mb-8 max-w-md mx-auto">Looks like you haven&apos;t added anything yet. Explore our range of natural beauty products!</p>
-          <Link href="/products" className="btn-primary px-8 py-3">
-            Start Shopping
-          </Link>
+      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', padding: '6rem 1.5rem' }}>
+          <ShoppingBag size={56} style={{ color: 'var(--bg-muted)', margin: '0 auto 1.5rem' }} />
+          <h1 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.875rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.75rem' }}>
+            Your cart is empty
+          </h1>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', maxWidth: 400, margin: '0 auto 2rem' }}>
+            Looks like you haven&apos;t added anything yet. Explore our range of natural beauty products!
+          </p>
+          <Link href="/products" className="btn-primary">Start Shopping</Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container py-10">
-        <div className="flex items-center gap-3 mb-8">
-          <Link href="/products" className="text-gray-400 hover:text-gray-700 transition flex items-center gap-1.5 text-sm">
-            <ArrowLeft size={16} /> Continue Shopping
+    <div style={{ minHeight: '100vh', background: 'var(--bg-alt)' }}>
+      <div className="container" style={{ paddingTop: '2.5rem', paddingBottom: '4rem' }}>
+
+        {/* Header row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '2rem', flexWrap: 'wrap' }}>
+          <Link href="/products" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}>
+            <ArrowLeft size={15} /> Continue Shopping
           </Link>
-          <span className="text-gray-200">|</span>
-          <h1 className="font-heading text-2xl font-bold text-gray-900">
-            Shopping Cart <span className="text-gray-400 font-normal text-lg">({totalItems} item{totalItems !== 1 ? 's' : ''})</span>
+          <span style={{ color: 'var(--border-strong)' }}>|</span>
+          <h1 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.5rem', fontWeight: 600, color: 'var(--text)' }}>
+            Shopping Cart <span style={{ color: 'var(--text-faint)', fontWeight: 400, fontSize: '1rem' }}>({totalItems} item{totalItems !== 1 ? 's' : ''})</span>
           </h1>
         </div>
 
-        {/* Free shipping progress */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-6">
+        {/* Free shipping bar */}
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: '14px 20px', marginBottom: '1.5rem' }}>
           {qualifiesForFreeShipping ? (
-            <div className="flex items-center gap-2 text-green-600">
-              <Truck size={18} />
-              <span className="text-sm font-semibold">🎉 You qualify for free shipping!</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--success)', fontSize: 13, fontWeight: 500 }}>
+              <Truck size={16} />
+              <span>🎉 You qualify for free shipping!</span>
             </div>
           ) : (
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Truck size={16} />
-                  <span className="text-sm">Add <span className="font-semibold text-gray-900">{formatPrice(freeShippingThreshold - subtotal)}</span> more for free shipping</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: 13 }}>
+                  <Truck size={15} />
+                  <span>Add <strong style={{ color: 'var(--text)' }}>{formatPrice(freeShippingThreshold - subtotal)}</strong> more for free shipping</span>
                 </div>
-                <span className="text-xs text-gray-400">{formatPrice(freeShippingThreshold)} threshold</span>
+                <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>{formatPrice(freeShippingThreshold)} threshold</span>
               </div>
-              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <div className="h-full bg-green-500 rounded-full transition-all duration-500" style={{ width: `${shippingProgress}%` }} />
+              <div style={{ height: 5, background: 'var(--bg-muted)', borderRadius: 9999, overflow: 'hidden' }}>
+                <div style={{ height: '100%', background: 'var(--success)', borderRadius: 9999, width: `${shippingProgress}%`, transition: 'width 0.5s ease' }} />
               </div>
             </div>
           )}
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Cart Items */}
-          <div className="lg:col-span-2 space-y-4">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }} className="lg:grid-cols-3">
+          <div style={{ gridColumn: 'span 2' }} className="space-y-4">
             {items.map((item, idx) => {
               const price = item.product.salePrice || item.product.price;
               return (
-                <div key={`${item.product._id}-${item.variant?.value ?? ''}-${idx}`}
-                  className="bg-white rounded-2xl border border-gray-100 p-5 flex gap-5">
+                <div
+                  key={`${item.product._id}-${item.variant?.value ?? ''}-${idx}`}
+                  style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: '1.25rem', display: 'flex', gap: '1.25rem' }}
+                >
                   {/* Image */}
-                  <Link href={`/products/${item.product.slug}`}>
-                    <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-gray-50 shrink-0">
+                  <Link href={`/products/${item.product.slug}`} style={{ flexShrink: 0 }}>
+                    <div style={{ width: 90, height: 90, borderRadius: 'var(--radius-lg)', overflow: 'hidden', background: 'var(--bg-alt)', position: 'relative' }}>
                       {item.product.images[0] ? (
-                        <Image src={item.product.images[0]} alt={item.product.name} fill className="object-cover" sizes="96px" />
+                        <Image src={item.product.images[0]} alt={item.product.name} fill style={{ objectFit: 'cover' }} sizes="90px" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <ShoppingBag size={32} className="text-gray-300" />
+                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <ShoppingBag size={28} style={{ color: 'var(--bg-muted)' }} />
                         </div>
                       )}
                     </div>
                   </Link>
 
                   {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-3">
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
                       <div>
                         <Link href={`/products/${item.product.slug}`}>
-                          <h3 className="font-semibold text-gray-900 hover:text-gray-600 transition line-clamp-1">{item.product.name}</h3>
+                          <h3 style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)', lineHeight: 1.4 }} className="line-clamp-1">{item.product.name}</h3>
                         </Link>
                         {item.variant && (
-                          <p className="text-sm text-gray-500 mt-0.5">{item.variant.name}: {item.variant.value}</p>
+                          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{item.variant.name}: {item.variant.value}</p>
                         )}
                       </div>
                       <button onClick={() => removeItem(item.product._id, item.variant)}
-                        className="text-gray-300 hover:text-red-400 transition shrink-0" aria-label="Remove">
-                        <Trash2 size={18} />
+                        aria-label="Remove"
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-faint)', padding: 4, flexShrink: 0, transition: 'color 0.2s', display: 'flex' }}
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--error)'}
+                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-faint)'}>
+                        <Trash2 size={16} />
                       </button>
                     </div>
 
-                    <div className="flex items-center justify-between mt-4">
-                      {/* Quantity */}
-                      <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '1rem' }}>
+                      {/* Qty control */}
+                      <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
                         <button onClick={() => updateQuantity(item.product._id, item.quantity - 1, item.variant)}
-                          className="w-9 h-9 flex items-center justify-center hover:bg-gray-50 transition" aria-label="Decrease">
-                          <Minus size={14} />
+                          aria-label="Decrease"
+                          style={{ width: 34, height: 34, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', transition: 'background 0.15s' }}
+                          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--bg-alt)'}
+                          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'none'}>
+                          <Minus size={13} />
                         </button>
-                        <span className="w-10 text-center text-sm font-bold">{item.quantity}</span>
+                        <span style={{ width: 36, textAlign: 'center', fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{item.quantity}</span>
                         <button onClick={() => updateQuantity(item.product._id, item.quantity + 1, item.variant)}
-                          className="w-9 h-9 flex items-center justify-center hover:bg-gray-50 transition" aria-label="Increase">
-                          <Plus size={14} />
+                          aria-label="Increase"
+                          style={{ width: 34, height: 34, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', transition: 'background 0.15s' }}
+                          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--bg-alt)'}
+                          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'none'}>
+                          <Plus size={13} />
                         </button>
                       </div>
-
                       {/* Price */}
-                      <div className="text-right">
-                        <p className="font-bold text-gray-900">{formatPrice(price * item.quantity)}</p>
-                        {item.quantity > 1 && <p className="text-xs text-gray-400">{formatPrice(price)} each</p>}
+                      <div style={{ textAlign: 'right' }}>
+                        <p style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: 16, fontWeight: 500, color: 'var(--text)' }}>{formatPrice(price * item.quantity)}</p>
+                        {item.quantity > 1 && <p style={{ fontSize: 11, color: 'var(--text-faint)' }}>{formatPrice(price)} each</p>}
                       </div>
                     </div>
                   </div>
@@ -131,41 +145,40 @@ export default function CartPage() {
           </div>
 
           {/* Order Summary */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 sticky top-24">
-              <h2 className="font-heading text-xl font-bold text-gray-900 mb-5">Order Summary</h2>
+          <div>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: '1.5rem', position: 'sticky', top: 88 }}>
+              <h2 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.25rem', fontWeight: 600, color: 'var(--text)', marginBottom: '1.25rem' }}>Order Summary</h2>
 
-              <div className="space-y-3 mb-5">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Subtotal ({totalItems} items)</span>
-                  <span className="font-semibold">{formatPrice(subtotal)}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Subtotal ({totalItems} items)</span>
+                  <span style={{ fontWeight: 500, color: 'var(--text)' }}>{formatPrice(subtotal)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Shipping</span>
-                  <span className={qualifiesForFreeShipping ? 'text-green-600 font-semibold' : 'font-semibold'}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Shipping</span>
+                  <span style={{ fontWeight: 500, color: qualifiesForFreeShipping ? 'var(--success)' : 'var(--text)' }}>
                     {qualifiesForFreeShipping ? 'FREE' : formatPrice(79)}
                   </span>
                 </div>
-                <div className="border-t border-gray-100 pt-3 flex justify-between">
-                  <span className="font-bold text-gray-900">Total</span>
-                  <span className="font-bold text-xl text-gray-900">
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12, display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontWeight: 600, color: 'var(--text)' }}>Total</span>
+                  <span style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.25rem', fontWeight: 600, color: 'var(--text)' }}>
                     {formatPrice(subtotal + (qualifiesForFreeShipping ? 0 : 79))}
                   </span>
                 </div>
               </div>
 
-              <Link href="/checkout" className="btn-primary w-full text-center flex items-center justify-center gap-2 py-3.5">
-                Proceed to Checkout <ArrowRight size={18} />
+              <Link href="/checkout" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '0.875rem' }}>
+                Proceed to Checkout <ArrowRight size={16} />
               </Link>
 
-              <div className="mt-5 space-y-2.5">
+              <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {[
-                  { icon: <Shield size={14} />, text: '100% Secure Checkout' },
-                  { icon: <Truck size={14} />, text: 'Fast Delivery Across India' },
+                  { icon: <Shield size={13} />, text: '100% Secure Checkout' },
+                  { icon: <Truck size={13} />, text: 'Fast Delivery Across India' },
                 ].map(({ icon, text }) => (
-                  <div key={text} className="flex items-center gap-2 text-xs text-gray-500">
-                    <span className="text-gray-400">{icon}</span>
-                    {text}
+                  <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: 'var(--text-faint)' }}>
+                    {icon} {text}
                   </div>
                 ))}
               </div>

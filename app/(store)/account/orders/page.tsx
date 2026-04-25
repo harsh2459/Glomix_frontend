@@ -3,19 +3,25 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Package, ChevronRight, Clock, Search } from 'lucide-react';
+import { Package, ChevronRight, Clock } from 'lucide-react';
 import { IOrder } from '../../../../types';
 import { apiGet } from '../../../../lib/api';
 import { formatPrice } from '../../../../lib/utils';
 
-const STATUS_STYLES: Record<string, string> = {
-  pending:    'bg-yellow-50 text-yellow-700 border-yellow-200',
-  confirmed:  'bg-blue-50 text-blue-700 border-blue-200',
-  processing: 'bg-purple-50 text-purple-700 border-purple-200',
-  shipped:    'bg-indigo-50 text-indigo-700 border-indigo-200',
-  delivered:  'bg-green-50 text-green-700 border-green-200',
-  cancelled:  'bg-red-50 text-red-600 border-red-200',
-  refunded:   'bg-gray-50 text-gray-600 border-gray-200',
+const STATUS_CLASS: Record<string, string> = {
+  pending:    'status-pending',
+  confirmed:  'status-confirmed',
+  processing: 'status-processing',
+  shipped:    'status-shipped',
+  delivered:  'status-delivered',
+  cancelled:  'status-cancelled',
+  refunded:   'status-refunded',
+};
+
+const cardStyle: React.CSSProperties = {
+  background: 'var(--surface)',
+  border: '1px solid var(--border)',
+  borderRadius: 'var(--radius-xl)',
 };
 
 export default function OrdersPage() {
@@ -42,92 +48,101 @@ export default function OrdersPage() {
   ];
 
   return (
-    <div className="space-y-5">
-      <div className="bg-white rounded-2xl border border-gray-100 p-6">
-        <h1 className="font-heading text-2xl font-bold text-gray-900">My Orders</h1>
-        <p className="text-gray-500 text-sm mt-1">Track and manage your purchases</p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      <div style={{ ...cardStyle, padding: '1.5rem' }}>
+        <h1 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.5rem', fontWeight: 600, color: 'var(--text)' }}>My Orders</h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>Track and manage your purchases</p>
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 flex-wrap">
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {statusTabs.map(tab => (
           <button key={tab.value} onClick={() => setFilter(tab.value)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition border ${
-              filter === tab.value
-                ? 'bg-gray-900 text-white border-gray-900'
-                : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
-            }`}>
+            style={{
+              padding: '6px 16px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 500,
+              cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s',
+              background: filter === tab.value ? 'var(--ink)' : 'var(--surface)',
+              color: filter === tab.value ? 'var(--ink-text)' : 'var(--text-muted)',
+              border: `1px solid ${filter === tab.value ? 'var(--ink)' : 'var(--border)'}`,
+            }}>
             {tab.label}
             {tab.value === 'all' && orders.length > 0 && (
-              <span className="ml-1.5 text-xs opacity-70">({orders.length})</span>
+              <span style={{ marginLeft: 6, fontSize: 11, opacity: 0.7 }}>({orders.length})</span>
             )}
           </button>
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      <div style={{ ...cardStyle, overflow: 'hidden' }}>
         {loading && (
-          <div className="p-6 space-y-4">
-            {[1,2,3,4].map(i => <div key={i} className="skeleton h-24 rounded-xl" />)}
+          <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {[1,2,3,4].map(i => <div key={i} className="skeleton" style={{ height: 96, borderRadius: 'var(--radius-xl)' }} />)}
           </div>
         )}
 
         {!loading && filtered.length === 0 && (
-          <div className="text-center py-20">
-            <Package size={48} className="text-gray-200 mx-auto mb-4" />
-            <h2 className="font-heading text-xl font-bold text-gray-800 mb-2">
+          <div style={{ textAlign: 'center', padding: '5rem 1.5rem' }}>
+            <Package size={48} style={{ color: 'var(--bg-muted)', margin: '0 auto 1rem' }} />
+            <h2 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.25rem', fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>
               {filter === 'all' ? 'No orders yet' : `No ${filter} orders`}
             </h2>
-            <p className="text-gray-500 text-sm mb-6">
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: '1.5rem' }}>
               {filter === 'all' ? "You haven't placed any orders yet" : 'Try a different filter'}
             </p>
-            {filter === 'all' && <Link href="/products" className="btn-primary">Start Shopping</Link>}
+            {filter === 'all' && <Link href="/products" className="btn-primary" style={{ fontSize: 13, padding: '0.6rem 1.5rem' }}>Start Shopping</Link>}
           </div>
         )}
 
         {!loading && filtered.length > 0 && (
-          <div className="divide-y divide-gray-100">
-            {filtered.map(order => (
+          <div>
+            {filtered.map((order, idx) => (
               <Link key={order._id} href={`/account/orders/${order._id}`}
-                className="block p-5 hover:bg-gray-50 transition">
-                <div className="flex items-start justify-between gap-4 mb-3">
+                style={{
+                  display: 'block', padding: '1.25rem', textDecoration: 'none',
+                  borderBottom: idx < filtered.length - 1 ? '1px solid var(--border)' : 'none',
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--bg-alt)'}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 12 }}>
                   <div>
-                    <p className="font-bold text-gray-900">#{order.orderNumber}</p>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <Clock size={12} className="text-gray-400" />
-                      <span className="text-xs text-gray-400">
+                    <p style={{ fontWeight: 600, color: 'var(--text)', fontSize: 14 }}>#{order.orderNumber}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 4 }}>
+                      <Clock size={12} style={{ color: 'var(--text-faint)' }} />
+                      <span style={{ fontSize: 12, color: 'var(--text-faint)' }}>
                         {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-bold text-gray-900">{formatPrice(order.total)}</span>
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${STATUS_STYLES[order.orderStatus] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span style={{ fontWeight: 600, color: 'var(--text)', fontSize: 14 }}>{formatPrice(order.total)}</span>
+                    <span className={STATUS_CLASS[order.orderStatus] ?? 'status-refunded'}
+                      style={{ fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 9999, letterSpacing: '0.03em', textTransform: 'capitalize' }}>
                       {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
                     </span>
-                    <ChevronRight size={16} className="text-gray-300" />
+                    <ChevronRight size={16} style={{ color: 'var(--text-faint)' }} />
                   </div>
                 </div>
 
                 {/* Product thumbnails */}
-                <div className="flex items-center gap-2">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {order.items.slice(0, 4).map((item, i) => (
-                    <div key={i} className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 shrink-0">
+                    <div key={i} style={{ position: 'relative', width: 48, height: 48, borderRadius: 'var(--radius-lg)', overflow: 'hidden', background: 'var(--bg-alt)', border: '1px solid var(--border)', flexShrink: 0 }}>
                       {item.image ? (
-                        <Image src={item.image} alt={item.name} fill className="object-cover" sizes="48px" />
+                        <Image src={item.image} alt={item.name} fill style={{ objectFit: 'cover' }} sizes="48px" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Package size={16} className="text-gray-300" />
+                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Package size={16} style={{ color: 'var(--text-faint)' }} />
                         </div>
                       )}
                     </div>
                   ))}
                   {order.items.length > 4 && (
-                    <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500">
+                    <div style={{ width: 48, height: 48, borderRadius: 'var(--radius-lg)', background: 'var(--bg-alt)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>
                       +{order.items.length - 4}
                     </div>
                   )}
-                  <span className="text-sm text-gray-500 ml-1">
+                  <span style={{ fontSize: 13, color: 'var(--text-muted)', marginLeft: 4 }}>
                     {order.items.length} item{order.items.length !== 1 ? 's' : ''}
                   </span>
                 </div>

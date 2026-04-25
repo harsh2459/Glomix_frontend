@@ -9,17 +9,24 @@ import { IOrder } from '../../../../../types';
 import { apiGet } from '../../../../../lib/api';
 import { formatPrice } from '../../../../../lib/utils';
 
-const STATUS_STYLES: Record<string, string> = {
-  pending:    'bg-yellow-50 text-yellow-700 border-yellow-200',
-  confirmed:  'bg-blue-50 text-blue-700 border-blue-200',
-  processing: 'bg-purple-50 text-purple-700 border-purple-200',
-  shipped:    'bg-indigo-50 text-indigo-700 border-indigo-200',
-  delivered:  'bg-green-50 text-green-700 border-green-200',
-  cancelled:  'bg-red-50 text-red-600 border-red-200',
-  refunded:   'bg-gray-50 text-gray-600 border-gray-200',
+const STATUS_CLASS: Record<string, string> = {
+  pending:    'status-pending',
+  confirmed:  'status-confirmed',
+  processing: 'status-processing',
+  shipped:    'status-shipped',
+  delivered:  'status-delivered',
+  cancelled:  'status-cancelled',
+  refunded:   'status-refunded',
 };
 
 const ORDER_STEPS = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
+
+const cardStyle: React.CSSProperties = {
+  background: 'var(--surface)',
+  border: '1px solid var(--border)',
+  borderRadius: 'var(--radius-xl)',
+  padding: '1.5rem',
+};
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -35,8 +42,8 @@ export default function OrderDetailPage() {
   }, [id, router]);
 
   if (loading) return (
-    <div className="space-y-4">
-      {[1,2,3].map(i => <div key={i} className="skeleton h-32 rounded-2xl" />)}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 128, borderRadius: 'var(--radius-xl)' }} />)}
     </div>
   );
 
@@ -46,50 +53,59 @@ export default function OrderDetailPage() {
   const isCancelled = order.orderStatus === 'cancelled' || order.orderStatus === 'refunded';
 
   return (
-    <div className="space-y-5">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Header */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6">
-        <Link href="/account/orders" className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 mb-4 transition">
+      <div style={cardStyle}>
+        <Link href="/account/orders"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-muted)', textDecoration: 'none', marginBottom: '1rem', transition: 'color 0.2s' }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}>
           <ArrowLeft size={14} /> Back to Orders
         </Link>
-        <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div>
-            <h1 className="font-heading text-xl font-bold text-gray-900">Order #{order.orderNumber}</h1>
-            <p className="text-sm text-gray-500 mt-1 flex items-center gap-1.5">
+            <h1 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.25rem', fontWeight: 600, color: 'var(--text)' }}>Order #{order.orderNumber}</h1>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 5 }}>
               <Clock size={13} />
               Placed on {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <span className={`text-sm font-semibold px-3 py-1.5 rounded-full border ${STATUS_STYLES[order.orderStatus] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
-              {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
-            </span>
-          </div>
+          <span className={STATUS_CLASS[order.orderStatus] ?? 'status-refunded'}
+            style={{ fontSize: 12, fontWeight: 600, padding: '5px 14px', borderRadius: 9999, letterSpacing: '0.03em', textTransform: 'capitalize' }}>
+            {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
+          </span>
         </div>
       </div>
 
       {/* Progress tracker */}
       {!isCancelled && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h2 className="font-heading text-base font-bold text-gray-900 mb-6">Order Progress</h2>
-          <div className="flex items-center gap-0 overflow-x-auto pb-2">
+        <div style={cardStyle}>
+          <h2 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1rem', fontWeight: 600, color: 'var(--text)', marginBottom: '1.5rem' }}>Order Progress</h2>
+          <div style={{ display: 'flex', alignItems: 'center', overflowX: 'auto', paddingBottom: 8 }}>
             {ORDER_STEPS.map((step, idx) => {
               const done = currentStepIdx >= idx;
               const current = currentStepIdx === idx;
               return (
-                <div key={step} className="flex items-center flex-1 min-w-0">
-                  <div className="flex flex-col items-center">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition ${
-                      done ? 'bg-gray-900 border-gray-900 text-white' : 'border-gray-200 text-gray-300'
-                    } ${current ? 'ring-2 ring-gray-900 ring-offset-2' : ''}`}>
+                <div key={step} style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: '50%',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: done ? 'var(--ink)' : 'var(--bg-alt)',
+                      border: `2px solid ${done ? 'var(--ink)' : 'var(--border)'}`,
+                      color: done ? 'var(--ink-text)' : 'var(--text-faint)',
+                      outline: current ? '2px solid var(--ink)' : 'none',
+                      outlineOffset: 2,
+                      transition: 'all 0.2s',
+                    }}>
                       {done ? <CheckCircle size={16} /> : <Circle size={16} />}
                     </div>
-                    <p className={`text-xs mt-2 font-medium whitespace-nowrap ${done ? 'text-gray-900' : 'text-gray-400'}`}>
+                    <p style={{ fontSize: 11, marginTop: 8, fontWeight: 500, whiteSpace: 'nowrap', color: done ? 'var(--text)' : 'var(--text-faint)' }}>
                       {step.charAt(0).toUpperCase() + step.slice(1)}
                     </p>
                   </div>
                   {idx < ORDER_STEPS.length - 1 && (
-                    <div className={`flex-1 h-0.5 mx-2 ${currentStepIdx > idx ? 'bg-gray-900' : 'bg-gray-100'}`} />
+                    <div style={{ flex: 1, height: 2, margin: '0 8px', marginBottom: 24, background: currentStepIdx > idx ? 'var(--ink)' : 'var(--border)' }} />
                   )}
                 </div>
               );
@@ -98,54 +114,54 @@ export default function OrderDetailPage() {
 
           {order.trackingUrl && (
             <a href={order.trackingUrl} target="_blank" rel="noopener noreferrer"
-              className="mt-5 flex items-center gap-2 text-sm text-blue-600 font-semibold hover:underline">
+              style={{ marginTop: '1.25rem', display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--info)', fontWeight: 500, textDecoration: 'none' }}>
               <Truck size={14} /> Track your shipment <ExternalLink size={12} />
             </a>
           )}
-          {order.awb && <p className="text-xs text-gray-500 mt-1">AWB: {order.awb} {order.shippingPartner ? `· ${order.shippingPartner}` : ''}</p>}
+          {order.awb && <p style={{ fontSize: 12, color: 'var(--text-faint)', marginTop: 4 }}>AWB: {order.awb} {order.shippingPartner ? `· ${order.shippingPartner}` : ''}</p>}
         </div>
       )}
 
       {/* Order items */}
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        <div className="p-5 border-b border-gray-100">
-          <h2 className="font-heading text-base font-bold text-gray-900">Items Ordered</h2>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', overflow: 'hidden' }}>
+        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)' }}>
+          <h2 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1rem', fontWeight: 600, color: 'var(--text)' }}>Items Ordered</h2>
         </div>
-        <div className="divide-y divide-gray-100">
+        <div>
           {order.items.map((item, i) => (
-            <div key={i} className="flex gap-4 p-5">
-              <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-gray-50 shrink-0">
+            <div key={i} style={{ display: 'flex', gap: 16, padding: '1.25rem 1.5rem', borderBottom: i < order.items.length - 1 ? '1px solid var(--border)' : 'none' }}>
+              <div style={{ position: 'relative', width: 64, height: 64, borderRadius: 'var(--radius-lg)', overflow: 'hidden', background: 'var(--bg-alt)', flexShrink: 0 }}>
                 {item.image ? (
-                  <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
+                  <Image src={item.image} alt={item.name} fill style={{ objectFit: 'cover' }} sizes="64px" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Package size={20} className="text-gray-300" />
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Package size={20} style={{ color: 'var(--text-faint)' }} />
                   </div>
                 )}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 text-sm">{item.name}</p>
-                {item.variant && <p className="text-xs text-gray-500 mt-0.5">{item.variant.name}: {item.variant.value}</p>}
-                <p className="text-xs text-gray-400 mt-1">Qty: {item.quantity}</p>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontWeight: 500, color: 'var(--text)', fontSize: 13 }}>{item.name}</p>
+                {item.variant && <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{item.variant.name}: {item.variant.value}</p>}
+                <p style={{ fontSize: 12, color: 'var(--text-faint)', marginTop: 4 }}>Qty: {item.quantity}</p>
               </div>
-              <div className="text-right shrink-0">
-                <p className="font-bold text-gray-900">{formatPrice(item.price * item.quantity)}</p>
-                <p className="text-xs text-gray-400">{formatPrice(item.price)} each</p>
+              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                <p style={{ fontWeight: 600, color: 'var(--text)', fontSize: 14 }}>{formatPrice(item.price * item.quantity)}</p>
+                <p style={{ fontSize: 12, color: 'var(--text-faint)', marginTop: 2 }}>{formatPrice(item.price)} each</p>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-5">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.25rem' }} className="sm:grid-cols-2">
         {/* Shipping address */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <MapPin size={16} className="text-gray-400" />
-            <h2 className="font-heading text-base font-bold text-gray-900">Shipping Address</h2>
+        <div style={cardStyle}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
+            <MapPin size={15} style={{ color: 'var(--text-muted)' }} />
+            <h2 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1rem', fontWeight: 600, color: 'var(--text)' }}>Shipping Address</h2>
           </div>
-          <div className="text-sm text-gray-600 space-y-0.5">
-            <p className="font-semibold text-gray-900">{order.shippingAddress.fullName}</p>
+          <div style={{ fontSize: 13, color: 'var(--text-sub)', lineHeight: 1.8 }}>
+            <p style={{ fontWeight: 600, color: 'var(--text)' }}>{order.shippingAddress.fullName}</p>
             <p>{order.shippingAddress.phone}</p>
             <p>{order.shippingAddress.addressLine1}</p>
             {order.shippingAddress.addressLine2 && <p>{order.shippingAddress.addressLine2}</p>}
@@ -155,40 +171,40 @@ export default function OrderDetailPage() {
         </div>
 
         {/* Payment summary */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <CreditCard size={16} className="text-gray-400" />
-            <h2 className="font-heading text-base font-bold text-gray-900">Payment Details</h2>
+        <div style={cardStyle}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
+            <CreditCard size={15} style={{ color: 'var(--text-muted)' }} />
+            <h2 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1rem', fontWeight: 600, color: 'var(--text)' }}>Payment Details</h2>
           </div>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-500">Method</span>
-              <span className="font-medium capitalize">{order.paymentMethod === 'razorpay' ? 'Online Payment' : 'Cash on Delivery'}</span>
+          <div style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--text-muted)' }}>Method</span>
+              <span style={{ fontWeight: 500, color: 'var(--text)', textTransform: 'capitalize' }}>{order.paymentMethod === 'razorpay' ? 'Online Payment' : 'Cash on Delivery'}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Status</span>
-              <span className={`font-semibold capitalize ${order.paymentStatus === 'paid' ? 'text-green-600' : order.paymentStatus === 'failed' ? 'text-red-500' : 'text-yellow-600'}`}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--text-muted)' }}>Status</span>
+              <span style={{ fontWeight: 600, textTransform: 'capitalize', color: order.paymentStatus === 'paid' ? 'var(--success)' : order.paymentStatus === 'failed' ? 'var(--error)' : 'var(--warning)' }}>
                 {order.paymentStatus}
               </span>
             </div>
-            <div className="border-t border-gray-100 pt-2 mt-2 space-y-1.5">
-              <div className="flex justify-between text-xs">
-                <span className="text-gray-400">Subtotal</span>
-                <span>{formatPrice(order.subtotal)}</span>
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: 10, marginTop: 4, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                <span style={{ color: 'var(--text-faint)' }}>Subtotal</span>
+                <span style={{ color: 'var(--text-sub)' }}>{formatPrice(order.subtotal)}</span>
               </div>
               {order.discount > 0 && (
-                <div className="flex justify-between text-xs">
-                  <span className="text-gray-400">Discount</span>
-                  <span className="text-green-600">-{formatPrice(order.discount)}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                  <span style={{ color: 'var(--text-faint)' }}>Discount</span>
+                  <span style={{ color: 'var(--success)' }}>-{formatPrice(order.discount)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-xs">
-                <span className="text-gray-400">Shipping</span>
-                <span>{order.shippingCharge === 0 ? 'FREE' : formatPrice(order.shippingCharge)}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                <span style={{ color: 'var(--text-faint)' }}>Shipping</span>
+                <span style={{ color: 'var(--text-sub)' }}>{order.shippingCharge === 0 ? 'FREE' : formatPrice(order.shippingCharge)}</span>
               </div>
-              <div className="flex justify-between font-bold border-t border-gray-100 pt-1.5">
-                <span>Total</span>
-                <span>{formatPrice(order.total)}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, borderTop: '1px solid var(--border)', paddingTop: 8, marginTop: 4 }}>
+                <span style={{ color: 'var(--text)' }}>Total</span>
+                <span style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1.1rem', color: 'var(--text)' }}>{formatPrice(order.total)}</span>
               </div>
             </div>
           </div>
@@ -197,21 +213,21 @@ export default function OrderDetailPage() {
 
       {/* Timeline */}
       {order.timeline && order.timeline.length > 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h2 className="font-heading text-base font-bold text-gray-900 mb-5">Order Timeline</h2>
-          <div className="space-y-4">
+        <div style={cardStyle}>
+          <h2 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: '1rem', fontWeight: 600, color: 'var(--text)', marginBottom: '1.25rem' }}>Order Timeline</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {[...order.timeline].reverse().map((event, i) => (
-              <div key={i} className="flex gap-4">
-                <div className="flex flex-col items-center">
-                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                    <CheckCircle size={14} className="text-gray-500" />
+              <div key={i} style={{ display: 'flex', gap: 16 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--bg-alt)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <CheckCircle size={14} style={{ color: 'var(--text-muted)' }} />
                   </div>
-                  {i < order.timeline.length - 1 && <div className="w-0.5 flex-1 bg-gray-100 my-1" />}
+                  {i < order.timeline.length - 1 && <div style={{ width: 2, flex: 1, background: 'var(--border)', margin: '4px 0' }} />}
                 </div>
-                <div className="pb-4">
-                  <p className="text-sm font-semibold text-gray-900 capitalize">{event.status}</p>
-                  {event.message && <p className="text-xs text-gray-500 mt-0.5">{event.message}</p>}
-                  <p className="text-xs text-gray-400 mt-1">{new Date(event.timestamp).toLocaleString('en-IN')}</p>
+                <div style={{ paddingBottom: 16 }}>
+                  <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', textTransform: 'capitalize' }}>{event.status}</p>
+                  {event.message && <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{event.message}</p>}
+                  <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 4 }}>{new Date(event.timestamp).toLocaleString('en-IN')}</p>
                 </div>
               </div>
             ))}

@@ -1,0 +1,98 @@
+/*
+ * ═══════════════════════════════════════════════════════════
+ *  GLOMIX — BRAND COLOR SYSTEM
+ *  Change colors HERE only. Everything on the site updates.
+ *
+ *  Inspired by anthropic.com — warm cream + charcoal + rust
+ * ═══════════════════════════════════════════════════════════
+ */
+
+:root {
+  /* ── Core backgrounds ─────────────────────────────────── */
+  --bg:         #faf9f5;   /* page background — warm cream (anthropic.com) */
+  --bg-alt:     #f0ede6;   /* section alternate — slightly deeper cream */
+  --bg-muted:   #e8e6dc;   /* subtle tint — skeleton, dividers */
+  --surface:    #ffffff;   /* card / panel surface */
+
+  /* ── Text ─────────────────────────────────────────────── */
+  --text:       #141413;   /* primary text — near-black warm charcoal */
+  --text-sub:   #3a3935;   /* body / paragraph text */
+  --text-muted: #6e6c66;   /* secondary labels */
+  --text-faint: #b0aea5;   /* placeholder, meta, disabled */
+
+  /* ── Border ───────────────────────────────────────────── */
+  --border:         #e8e6dc;              /* default border — warm light gray */
+  --border-strong:  rgba(20,20,19,0.18);  /* hover/focus border */
+  --border-light:   rgba(20,20,19,0.06);  /* very subtle */
+
+  /* ── Brand accent (warm rust — anthropic primary CTA) ─── */
+  --accent:         #d97757;   /* warm rust/orange — CTAs, highlights */
+  --accent-dark:    #b85e3c;   /* darker rust — hover, links */
+  --accent-bg:      rgba(217,119,87,0.10); /* tinted bg */
+
+  /* ── Primary action (buttons, active states) ──────────── */
+  --ink:         #141413;   /* primary button bg — charcoal */
+  --ink-hover:   #2a2a28;   /* primary button hover */
+  --ink-text:    #faf9f5;   /* text on primary button — warm cream */
+
+  /* ── Status colors ────────────────────────────────────── */
+  --success:        #3a6b4a;
+  --success-bg:     #eef6f1;
+  --success-border: #b8d8c4;
+
+  --error:        #c0392b;
+  --error-bg:     #fdf2f2;
+  --error-border: #f5c6c2;
+
+  --warning:        #8a4a1a;
+  --warning-bg:     #fdf5ee;
+  --warning-border: #f0c89a;
+
+  --info:        #2a5a8c;
+  --info-bg:     #eef4fb;
+  --info-border: #b8d0ea;
+
+  /* ── Order status badges ──────────────────────────────── */
+  --status-pending-bg:    #fdf5ee;
+  --status-pending-text:  #8a4a1a;
+  --status-pending-border:#f0c89a;
+
+  --status-confirmed-bg:    #eef4fb;
+  --status-confirmed-text:  #2a5a8c;
+  --status-confirmed-border:#b8d0ea;
+
+  --status-processing-bg:    #f4f0fa;
+  --status-processing-text:  #5b3a9e;
+  --status-processing-border:#cfc0eb;
+
+  --status-shipped-bg:    #eef0fa;
+  --status-shipped-text:  #2e3a9e;
+  --status-shipped-border:#b8c0eb;
+
+  --status-delivered-bg:    #eef6f1;
+  --status-delivered-text:  #3a6b4a;
+  --status-delivered-border:#b8d8c4;
+
+  --status-cancelled-bg:    #fdf2f2;
+  --status-cancelled-text:  #c0392b;
+  --status-cancelled-border:#f5c6c2;
+
+  --status-refunded-bg:    #f0ede6;
+  --status-refunded-text:  #6e6c66;
+  --status-refunded-border:#d4d1c8;
+
+  /* ── Radius ───────────────────────────────────────────── */
+  --radius-xs:  0.25rem;    /*  4px */
+  --radius-sm:  0.375rem;   /*  6px */
+  --radius:     0.5rem;     /*  8px — tighter, more editorial */
+  --radius-lg:  0.75rem;    /* 12px */
+  --radius-xl:  1rem;       /* 16px */
+  --radius-2xl: 1.5rem;     /* 24px */
+  --radius-pill:9999px;
+
+  /* ── Shadows ──────────────────────────────────────────── */
+  --shadow-sm:   0 1px 4px  rgba(20,20,19,0.06);
+  --shadow-card: 0 2px 12px rgba(20,20,19,0.07);
+  --shadow-lift: 0 8px 32px rgba(20,20,19,0.10);
+  --shadow-deep: 0 16px 48px rgba(20,20,19,0.13);
+}

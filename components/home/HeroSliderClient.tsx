@@ -9,13 +9,12 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Sparkles, ArrowRight, Leaf, Shield, Star } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { ISiteSettings } from '../../types';
 
-// Default fallback hero shown when no banners are in DB
 const FALLBACK_SLIDE = {
-  heading: 'Glow with\nPure Nature',
-  subheading: 'Handcrafted with love — natural ingredients for radiant, healthy skin.',
+  heading: 'Beauty Rooted\nin Nature',
+  subheading: 'Handcrafted with the finest natural ingredients for radiant, healthy skin.',
   buttonText: 'Shop Now',
   buttonLink: '/products',
   image: null,
@@ -33,7 +32,6 @@ export default function HeroSliderClient({ slides, settings }: { slides: any[]; 
     ? [...settings.heroTrustBadges].sort((a, b) => a.order - b.order)
     : DEFAULT_TRUST_BADGES;
 
-  // Use fallback when no slides from DB
   const activeSlides = slides && slides.length > 0 ? slides : [FALLBACK_SLIDE];
 
   const renderSlideContent = (slide: any, i: number) => (
@@ -49,72 +47,95 @@ export default function HeroSliderClient({ slides, settings }: { slides: any[]; 
             priority={i === 0}
             sizes="100vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/75 to-white/20" />
+          {/* Gradient overlay — left side readable, right shows image */}
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(250,250,248,0.97) 0%, rgba(250,250,248,0.88) 35%, rgba(250,250,248,0.55) 55%, rgba(250,250,248,0.10) 75%, transparent 100%)' }} />
         </>
       ) : (
-        /* Gradient background when no image */
-        <div className="absolute inset-0 bg-gradient-to-br from-rose-50 via-pink-50/40 to-purple-50/30">
-          {/* Decorative circles */}
-          <div className="absolute top-10 right-[15%] w-80 h-80 rounded-full bg-pink-100/60 blur-3xl" />
-          <div className="absolute bottom-10 right-[5%] w-64 h-64 rounded-full bg-purple-100/40 blur-3xl" />
-          <div className="absolute top-1/2 right-[30%] w-48 h-48 rounded-full bg-rose-100/50 blur-2xl" />
-          {/* Decorative product mockup */}
-          <div className="absolute right-8 md:right-24 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-4 items-center opacity-20">
-            <div className="w-32 h-48 rounded-2xl bg-gradient-to-b from-pink-300 to-rose-400 shadow-xl" />
-            <div className="w-20 h-32 rounded-2xl bg-gradient-to-b from-purple-300 to-pink-400 shadow-xl -mt-8 ml-20" />
-            <div className="w-24 h-36 rounded-2xl bg-gradient-to-b from-rose-200 to-pink-300 shadow-xl -mt-16 -ml-12" />
-          </div>
+        /* Clean gradient background — no image */
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #f5f3ef 0%, #ede9e4 40%, #e8e2da 70%, #f0ece5 100%)' }}>
+          {/* Minimal decorative blobs */}
+          <div style={{ position: 'absolute', top: '10%', right: '8%', width: 420, height: 420, borderRadius: '50%', background: 'rgba(200,169,110,0.07)', filter: 'blur(80px)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', bottom: '5%', right: '22%', width: 280, height: 280, borderRadius: '50%', background: 'rgba(200,169,110,0.05)', filter: 'blur(60px)', pointerEvents: 'none' }} />
         </div>
       )}
 
-      {/* Content overlay */}
-      <div className="absolute inset-0 z-20 pointer-events-none">
+      {/* Content */}
+      <div className="absolute inset-0 z-20" style={{ pointerEvents: 'none' }}>
         <div className="container relative h-full flex items-center">
-          <div className="max-w-2xl pointer-events-auto py-20 md:py-0">
-            {/* Tag */}
-            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-pink-100 text-pink-600 text-xs font-semibold px-4 py-2 rounded-full mb-6 shadow-sm">
-              <Sparkles size={13} />
-              {settings?.siteName ? `${settings.siteName} — Premium Natural Beauty` : 'Premium Natural Beauty'}
+          <div style={{ maxWidth: 560, paddingTop: 'clamp(64px, 8vw, 96px)', paddingBottom: 'clamp(64px, 8vw, 96px)', pointerEvents: 'auto' }}>
+
+            {/* Eyebrow label */}
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              fontSize: 10.5, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase',
+              color: '#6b6560', marginBottom: 24,
+            }}>
+              <span style={{ width: 20, height: 1, background: '#c8a96e', display: 'inline-block' }} />
+              {settings?.siteName ? `${settings.siteName} — Natural Beauty` : 'Premium Natural Beauty'}
             </div>
 
-            {/* Heading */}
-            <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-5 text-gray-900">
+            {/* Headline */}
+            <h1
+              style={{
+                fontFamily: 'var(--font-playfair, serif)',
+                fontSize: 'clamp(2.4rem, 5.5vw, 4.5rem)',
+                fontWeight: 600,
+                lineHeight: 1.08,
+                letterSpacing: '-0.02em',
+                color: '#0a0a0a',
+                marginBottom: 24,
+              }}
+            >
               {slide.heading
                 ? slide.heading.split('\n').map((line: string, li: number) => (
-                    <span key={li}>{line}{li < slide.heading.split('\n').length - 1 && <br />}</span>
+                    <span key={li} style={{ display: 'block' }}>{line}</span>
                   ))
-                : <>Glow with<br /><span style={{ color: 'var(--color-primary)' }}>Pure Nature</span></>
+                : <>Beauty Rooted<span style={{ display: 'block' }}>in Nature</span></>
               }
             </h1>
 
-            <p className="text-gray-500 text-base md:text-lg leading-relaxed mb-8 max-w-xl">
+            <p style={{ fontSize: 'clamp(0.95rem, 1.5vw, 1.0625rem)', color: '#6b6560', lineHeight: 1.75, marginBottom: 36, maxWidth: 420, fontWeight: 300 }}>
               {slide.subheading || 'Discover our collection of handcrafted beauty products made with the finest natural ingredients.'}
             </p>
 
             {/* CTAs */}
-            <div className="flex flex-wrap gap-3">
-              {slide.buttonLink ? (
-                <Link href={slide.buttonLink} className="btn-primary text-sm md:text-base px-7 py-3.5 gap-2">
-                  {slide.buttonText || 'Shop Now'} <ArrowRight size={17} />
-                </Link>
-              ) : (
-                <Link href="/products" className="btn-primary text-sm md:text-base px-7 py-3.5 gap-2">
-                  Shop Now <ArrowRight size={17} />
-                </Link>
-              )}
-              <Link href="/products?sort=bestsellers" className="btn-outline text-sm md:text-base px-7 py-3.5" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+              <Link
+                href={slide.buttonLink || '/products'}
+                className="btn-primary"
+                style={{ gap: 8 }}
+              >
+                {slide.buttonText || 'Shop Now'}
+                <ArrowRight size={15} />
+              </Link>
+              <Link
+                href="/products?sort=bestsellers"
+                className="btn-outline"
+              >
                 Best Sellers
               </Link>
             </div>
 
             {/* Trust badges */}
-            <div className="flex flex-wrap gap-3 mt-10">
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 40 }}>
               {trustBadges.slice(0, 4).map((badge: any, bIdx: number) => (
-                <div key={bIdx} className="flex items-center gap-1.5 text-xs font-medium text-gray-600 bg-white/70 backdrop-blur-sm py-1.5 px-3 rounded-full border border-gray-100 shadow-sm">
-                  <span>{typeof badge.icon === 'string' && (badge.icon.startsWith('http') || badge.icon.startsWith('/'))
-                    ? <img src={badge.icon} alt="" className="w-3.5 h-3.5 object-contain" />
-                    : badge.icon
-                  }</span>
+                <div
+                  key={bIdx}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    fontSize: 11.5, fontWeight: 400, color: '#6b6560',
+                    background: 'rgba(255,255,255,0.70)',
+                    backdropFilter: 'blur(8px)',
+                    padding: '6px 12px',
+                    borderRadius: 9999,
+                    border: '1px solid rgba(0,0,0,0.07)',
+                  }}
+                >
+                  <span>
+                    {typeof badge.icon === 'string' && (badge.icon.startsWith('http') || badge.icon.startsWith('/'))
+                      ? <img src={badge.icon} alt="" style={{ width: 13, height: 13, objectFit: 'contain' }} />
+                      : badge.icon}
+                  </span>
                   <span>{badge.text}</span>
                 </div>
               ))}
@@ -126,12 +147,12 @@ export default function HeroSliderClient({ slides, settings }: { slides: any[]; 
   );
 
   return (
-    <section className="relative min-h-[88vh] flex items-center overflow-hidden group">
+    <section className="relative overflow-hidden group" style={{ minHeight: '92vh', display: 'flex', alignItems: 'center' }}>
       <Swiper
         modules={[Autoplay, EffectFade, Pagination, Navigation]}
         effect="fade"
-        speed={900}
-        autoplay={{ delay: 5500, disableOnInteraction: false }}
+        speed={1000}
+        autoplay={{ delay: 5800, disableOnInteraction: false }}
         pagination={{ clickable: true }}
         navigation={{ prevEl: '.hero-prev', nextEl: '.hero-next' }}
         loop={activeSlides.length > 1}
@@ -144,14 +165,22 @@ export default function HeroSliderClient({ slides, settings }: { slides: any[]; 
         ))}
       </Swiper>
 
-      {/* Nav arrows — only show when multiple slides */}
+      {/* Nav arrows */}
       {activeSlides.length > 1 && (
         <>
-          <button className="hero-prev absolute left-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 bg-white/80 hover:bg-white border border-gray-100 shadow-lg rounded-full flex items-center justify-center transition-all text-gray-700 opacity-0 group-hover:opacity-100 backdrop-blur-sm" aria-label="Previous">
-            <ArrowRight className="rotate-180" size={18} />
+          <button
+            className="hero-prev absolute left-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+            aria-label="Previous"
+            style={{ background: '#ffffff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '50%', boxShadow: '0 2px 16px rgba(0,0,0,0.08)', cursor: 'pointer', color: '#0a0a0a' }}
+          >
+            <ArrowRight className="rotate-180" size={16} />
           </button>
-          <button className="hero-next absolute right-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 bg-white/80 hover:bg-white border border-gray-100 shadow-lg rounded-full flex items-center justify-center transition-all text-gray-700 opacity-0 group-hover:opacity-100 backdrop-blur-sm" aria-label="Next">
-            <ArrowRight size={18} />
+          <button
+            className="hero-next absolute right-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+            aria-label="Next"
+            style={{ background: '#ffffff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '50%', boxShadow: '0 2px 16px rgba(0,0,0,0.08)', cursor: 'pointer', color: '#0a0a0a' }}
+          >
+            <ArrowRight size={16} />
           </button>
         </>
       )}

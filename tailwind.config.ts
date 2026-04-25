@@ -11,23 +11,41 @@ const config: Config = {
   theme: {
     extend: {
       spacing: {
-        '65': '260px', // matches admin sidebar width
+        '65': '260px',
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'Inter', 'sans-serif'],
+        sans:    ['var(--font-inter)', 'Inter', 'sans-serif'],
         heading: ['var(--font-playfair)', 'Playfair Display', 'serif'],
       },
       colors: {
-        primary: 'var(--color-primary)',
-        secondary: 'var(--color-secondary)',
-        accent: 'var(--color-accent)',
-        surface: 'var(--color-surface)',
+        // Brand tokens — all resolve to theme.css variables
+        brand: {
+          bg:      'var(--bg)',
+          alt:     'var(--bg-alt)',
+          muted:   'var(--bg-muted)',
+          surface: 'var(--surface)',
+          text:    'var(--text)',
+          sub:     'var(--text-sub)',
+          faint:   'var(--text-faint)',
+          accent:  'var(--accent)',
+          ink:     'var(--ink)',
+        },
+        // Keep legacy aliases for pages that still use them
+        primary: 'var(--ink)',
+        surface: 'var(--surface)',
       },
       borderRadius: {
         DEFAULT: 'var(--radius)',
-        sm: 'var(--radius-sm)',
-        lg: 'var(--radius-lg)',
-        xl: 'var(--radius-xl)',
+        sm:   'var(--radius-sm)',
+        lg:   'var(--radius-lg)',
+        xl:   'var(--radius-xl)',
+        '2xl':'var(--radius-2xl)',
+        pill: 'var(--radius-pill)',
+      },
+      boxShadow: {
+        card: 'var(--shadow-card)',
+        lift: 'var(--shadow-lift)',
+        deep: 'var(--shadow-deep)',
       },
     },
   },

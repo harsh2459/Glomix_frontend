@@ -35,18 +35,15 @@ export default function ProductListingClient() {
   const updateParam = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     if (value) params.set(key, value); else params.delete(key);
-    // Only reset to page 1 when changing filters, not when changing page itself
     if (key !== 'page') params.delete('page');
     router.push(`/products?${params.toString()}`);
   };
 
-  // Load categories first, then products
   useEffect(() => {
     api.get<{ data: ICategory[] }>('/products/categories').then(res => setCategories(res.data.data ?? []));
   }, []);
 
   useEffect(() => {
-    // If a category filter is active but categories haven't loaded yet, wait
     if (category && categories.length === 0) return;
 
     const params = new URLSearchParams();
@@ -57,7 +54,6 @@ export default function ProductListingClient() {
     params.set('page', String(page));
     params.set('limit', '12');
 
-    // Resolve slug OR _id → always send _id to the API
     if (category) {
       const found = categories.find(c => c._id === category || c.slug === category);
       params.set('category', found ? found._id : category);
@@ -75,15 +71,26 @@ export default function ProductListingClient() {
 
   const hasFilters = !!(category || sort || minPrice || maxPrice);
 
+  const inputStyle: React.CSSProperties = {
+    width: 80,
+    padding: '7px 10px',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius)',
+    fontSize: 13,
+    color: 'var(--text)',
+    background: 'var(--bg)',
+    outline: 'none',
+    fontFamily: 'inherit',
+  };
+
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: 56, alignItems: 'start' }}>
 
-      {/* ── Sidebar ── */}
+      {/* Sidebar */}
       <aside className="hidden lg:block" style={{ position: 'sticky', top: 96 }}>
 
-        {/* Categories */}
         <div style={{ marginBottom: 32 }}>
-          <p style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#b0a99e', marginBottom: 12, fontWeight: 500 }}>
+          <p style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: 12, fontWeight: 500 }}>
             Category
           </p>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
@@ -100,13 +107,13 @@ export default function ProductListingClient() {
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       padding: '8px 10px',
-                      borderRadius: 6,
+                      borderRadius: 'var(--radius)',
                       border: 'none',
                       cursor: 'pointer',
                       fontSize: 13,
                       fontWeight: active ? 500 : 400,
-                      background: active ? '#f4f1ec' : 'transparent',
-                      color: active ? '#0a0a0a' : '#4a453f',
+                      background: active ? 'var(--bg-alt)' : 'transparent',
+                      color: active ? 'var(--text)' : 'var(--text-sub)',
                       transition: 'all 0.15s',
                     }}
                   >
@@ -118,64 +125,62 @@ export default function ProductListingClient() {
           </ul>
         </div>
 
-        <div style={{ height: 1, background: '#e8e4dd', marginBottom: 28 }} />
+        <div style={{ height: 1, background: 'var(--border)', marginBottom: 28 }} />
 
-        {/* Price range */}
         <div style={{ marginBottom: 28 }}>
-          <p style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#b0a99e', marginBottom: 12, fontWeight: 500 }}>
+          <p style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: 12, fontWeight: 500 }}>
             Price Range
           </p>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <input
               type="number" placeholder="₹ Min" value={minPrice}
               onChange={e => updateParam('minPrice', e.target.value)}
-              style={{ width: 80, padding: '7px 10px', border: '1px solid #e8e4dd', borderRadius: 6, fontSize: 13, color: '#0a0a0a', background: '#fafaf8', outline: 'none', fontFamily: 'inherit' }}
+              style={inputStyle}
               min="0"
             />
-            <span style={{ color: '#b0a99e', fontSize: 12 }}>—</span>
+            <span style={{ color: 'var(--text-faint)', fontSize: 12 }}>—</span>
             <input
               type="number" placeholder="₹ Max" value={maxPrice}
               onChange={e => updateParam('maxPrice', e.target.value)}
-              style={{ width: 80, padding: '7px 10px', border: '1px solid #e8e4dd', borderRadius: 6, fontSize: 13, color: '#0a0a0a', background: '#fafaf8', outline: 'none', fontFamily: 'inherit' }}
+              style={inputStyle}
               min="0"
             />
           </div>
         </div>
 
-        {/* Clear */}
         {hasFilters && (
           <button
             onClick={() => router.push('/products')}
-            style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#c1392b', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6, padding: '7px 12px', cursor: 'pointer', width: '100%', justifyContent: 'center' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--error)', background: 'var(--error-bg)', border: '1px solid var(--error-border)', borderRadius: 'var(--radius)', padding: '7px 12px', cursor: 'pointer', width: '100%', justifyContent: 'center', fontFamily: 'inherit' }}
           >
             <X size={12} /> Clear filters
           </button>
         )}
       </aside>
 
-      {/* ── Main ── */}
+      {/* Main */}
       <main>
 
         {/* Toolbar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28, paddingBottom: 18, borderBottom: '1px solid #e8e4dd' }}>
-          <p style={{ fontSize: 13, color: '#b0a99e' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28, paddingBottom: 18, borderBottom: '1px solid var(--border)' }}>
+          <p style={{ fontSize: 13, color: 'var(--text-faint)' }}>
             {loading ? 'Loading…' : (
-              <><strong style={{ color: '#0a0a0a', fontWeight: 500 }}>{total}</strong> Products</>
+              <><strong style={{ color: 'var(--text)', fontWeight: 500 }}>{total}</strong> Products</>
             )}
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 12, color: '#b0a99e', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Sort</span>
+            <span style={{ fontSize: 12, color: 'var(--text-faint)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Sort</span>
             <div style={{ position: 'relative' }}>
               <select
                 value={sort}
                 onChange={e => updateParam('sort', e.target.value)}
                 style={{
-                  border: '1px solid #e8e4dd',
-                  borderRadius: 6,
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius)',
                   padding: '7px 32px 7px 12px',
                   fontSize: 13,
-                  color: '#0a0a0a',
-                  background: '#fafaf8',
+                  color: 'var(--text)',
+                  background: 'var(--bg)',
                   outline: 'none',
                   cursor: 'pointer',
                   appearance: 'none',
@@ -198,11 +203,11 @@ export default function ProductListingClient() {
             return (
               <button key={c._id} onClick={() => updateParam('category', c.slug || c._id)}
                 style={{
-                  padding: '5px 14px', borderRadius: 20, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
+                  padding: '5px 14px', borderRadius: 'var(--radius-pill)', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
                   border: '1px solid',
-                  borderColor: active ? '#0a0a0a' : '#e8e4dd',
-                  background: active ? '#0a0a0a' : '#fafaf8',
-                  color: active ? '#fafaf8' : '#4a453f',
+                  borderColor: active ? 'var(--ink)' : 'var(--border)',
+                  background: active ? 'var(--ink)' : 'var(--bg)',
+                  color: active ? 'var(--ink-text)' : 'var(--text-sub)',
                   transition: 'all 0.15s',
                 }}>
                 {c.name}
@@ -212,8 +217,8 @@ export default function ProductListingClient() {
         </div>
 
         {search && (
-          <p style={{ marginBottom: 16, fontSize: 13, color: '#b0a99e' }}>
-            Results for: <strong style={{ color: '#0a0a0a' }}>"{search}"</strong>
+          <p style={{ marginBottom: 16, fontSize: 13, color: 'var(--text-faint)' }}>
+            Results for: <strong style={{ color: 'var(--text)' }}>"{search}"</strong>
           </p>
         )}
 
@@ -221,16 +226,15 @@ export default function ProductListingClient() {
         {loading ? (
           <div className="grid-products">
             {Array(12).fill(0).map((_, i) => (
-              <div key={i} className="rounded-xl" style={{ aspectRatio: '1/1', background: '#f4f1ec' }} />
+              <div key={i} className="skeleton rounded-xl" style={{ aspectRatio: '1/1' }} />
             ))}
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-24">
             <p style={{ fontSize: 32, marginBottom: 12 }}>🔍</p>
-            <p style={{ fontSize: 18, fontWeight: 500, color: '#0a0a0a', marginBottom: 8 }}>No products found</p>
-            <p style={{ color: '#b0a99e', marginBottom: 20 }}>Try adjusting your filters</p>
-            <button onClick={() => router.push('/products')}
-              style={{ background: '#0a0a0a', color: '#fafaf8', border: 'none', borderRadius: 8, padding: '11px 28px', fontSize: 13, fontWeight: 500, cursor: 'pointer', letterSpacing: '0.04em' }}>
+            <p style={{ fontSize: 18, fontWeight: 500, color: 'var(--text)', marginBottom: 8 }}>No products found</p>
+            <p style={{ color: 'var(--text-faint)', marginBottom: 20 }}>Try adjusting your filters</p>
+            <button onClick={() => router.push('/products')} className="btn-primary">
               Browse All
             </button>
           </div>
@@ -250,14 +254,14 @@ export default function ProductListingClient() {
                 style={{
                   width: 40, height: 40,
                   border: '1px solid',
-                  borderColor: page === i + 1 ? '#0a0a0a' : '#e8e4dd',
-                  borderRadius: 8,
+                  borderColor: page === i + 1 ? 'var(--ink)' : 'var(--border)',
+                  borderRadius: 'var(--radius)',
                   fontSize: 13,
                   fontWeight: 400,
                   cursor: 'pointer',
                   fontFamily: 'inherit',
-                  background: page === i + 1 ? '#0a0a0a' : '#fafaf8',
-                  color: page === i + 1 ? '#fafaf8' : '#4a453f',
+                  background: page === i + 1 ? 'var(--ink)' : 'var(--bg)',
+                  color: page === i + 1 ? 'var(--ink-text)' : 'var(--text-sub)',
                   transition: 'all 0.15s',
                 }}
               >

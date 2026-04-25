@@ -7,7 +7,7 @@ import {
   ChevronDown, ZoomIn, ArrowLeft, ArrowRight,
 } from 'lucide-react';
 import { IProduct, IProductTemplate, ITemplateField, ILayoutSection, ITemplateLayout, IReview } from '../../../../types';
-import { formatPrice, getDiscountPercent, cn } from '../../../../lib/utils';
+import { formatPrice, getDiscountPercent } from '../../../../lib/utils';
 import { useCartStore } from '../../../../stores/cartStore';
 import { useAuthStore } from '../../../../stores/authStore';
 import { apiPost } from '../../../../lib/api';
@@ -37,7 +37,7 @@ function Stars({ rating, size = 14 }: { rating: number; size?: number }) {
   return (
     <div style={{ display: 'flex', gap: 2 }}>
       {[1,2,3,4,5].map(s => (
-        <span key={s} style={{ color: s <= Math.round(rating) ? '#c8a96e' : '#ddd7cf', fontSize: size }}>★</span>
+        <span key={s} style={{ color: s <= Math.round(rating) ? 'var(--accent)' : 'var(--bg-muted)', fontSize: size }}>★</span>
       ))}
     </div>
   );
@@ -50,10 +50,10 @@ function FieldValue({ field, value }: { field: ITemplateField; value: unknown })
     return (
       <span style={{
         display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600,
-        padding: '3px 10px', borderRadius: 20,
-        background: isTrue ? '#edf7f1' : '#fef2f2',
-        color: isTrue ? '#2d4a3e' : '#c1392b',
-        border: `1px solid ${isTrue ? '#b2dfdb' : '#fecaca'}`,
+        padding: '3px 10px', borderRadius: 'var(--radius-pill)',
+        background: isTrue ? 'var(--success-bg)' : 'var(--error-bg)',
+        color: isTrue ? 'var(--success)' : 'var(--error)',
+        border: `1px solid ${isTrue ? 'var(--success-border)' : 'var(--error-border)'}`,
       }}>
         {isTrue ? <Check size={10} /> : '✕'} {isTrue ? 'Yes' : 'No'}
       </span>
@@ -64,16 +64,16 @@ function FieldValue({ field, value }: { field: ITemplateField; value: unknown })
     return (
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {items.map((item, i) => (
-          <span key={i} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 20, background: '#f4f1ec', color: '#4a453f' }}>
+          <span key={i} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--bg-alt)', color: 'var(--text-sub)' }}>
             {String(item)}
           </span>
         ))}
       </div>
     );
   }
-  if (field.type === 'textarea') return <p style={{ fontSize: 13, lineHeight: 1.8, color: '#4a453f', fontWeight: 300, whiteSpace: 'pre-line' }}>{String(value)}</p>;
+  if (field.type === 'textarea') return <p style={{ fontSize: 13, lineHeight: 1.8, color: 'var(--text-sub)', fontWeight: 300, whiteSpace: 'pre-line' }}>{String(value)}</p>;
   const display = field.unit ? `${value} ${field.unit}` : String(value);
-  return <span style={{ fontSize: 13, fontWeight: 500, color: '#0a0a0a' }}>{display}</span>;
+  return <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{display}</span>;
 }
 
 function Lightbox({ images, initial, onClose }: { images: string[]; initial: number; onClose: () => void }) {
@@ -171,7 +171,6 @@ export default function ProductDetailClient({ product, related }: Props) {
 
   const showRelated = sortedSections.find(s => s.type === 'related_products' && s.enabled) && related.length > 0;
 
-  // Rating distribution from live reviews
   const ratingDist = useMemo(() => {
     const dist: Record<number, number> = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
     reviews.forEach(r => { if (dist[r.rating] !== undefined) dist[r.rating]++; });
@@ -193,18 +192,17 @@ export default function ProductDetailClient({ product, related }: Props) {
     } catch { toast.error('Could not update wishlist'); }
   };
 
-  // ── Gallery ──────────────────────────────────────────────
   const renderGallery = () => {
     const imgs = product.images;
     if (!imgs.length) return (
-      <div style={{ width: '100%', aspectRatio: '1/1', borderRadius: 16, background: '#f4f1ec', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: '100%', aspectRatio: '1/1', borderRadius: 'var(--radius-xl)', background: 'var(--bg-alt)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Package size={60} style={{ opacity: 0.2 }} />
       </div>
     );
     return (
       <div>
         <div
-          style={{ width: '100%', aspectRatio: '1/1', borderRadius: 16, overflow: 'hidden', background: '#f4f1ec', marginBottom: 12, position: 'relative', cursor: 'zoom-in' }}
+          style={{ width: '100%', aspectRatio: '1/1', borderRadius: 'var(--radius-xl)', overflow: 'hidden', background: 'var(--bg-alt)', marginBottom: 12, position: 'relative', cursor: 'zoom-in' }}
           onClick={() => setLightbox(selectedImage)}
         >
           <Image
@@ -216,11 +214,11 @@ export default function ProductDetailClient({ product, related }: Props) {
             priority
           />
           {discount && (
-            <span style={{ position: 'absolute', top: 16, left: 16, background: '#0a0a0a', color: '#fafaf8', fontSize: 11, fontWeight: 500, padding: '5px 10px', borderRadius: 4, letterSpacing: '0.04em' }}>
+            <span style={{ position: 'absolute', top: 16, left: 16, background: 'var(--ink)', color: 'var(--ink-text)', fontSize: 11, fontWeight: 500, padding: '5px 10px', borderRadius: 'var(--radius)', letterSpacing: '0.04em' }}>
               -{discount}%
             </span>
           )}
-          <div style={{ position: 'absolute', bottom: 12, right: 12, width: 34, height: 34, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.3)' }}>
+          <div style={{ position: 'absolute', bottom: 12, right: 12, width: 34, height: 34, borderRadius: 'var(--radius)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.3)' }}>
             <ZoomIn size={14} style={{ color: '#fff' }} />
           </div>
         </div>
@@ -229,8 +227,8 @@ export default function ProductDetailClient({ product, related }: Props) {
             {imgs.slice(0, 8).map((img, i) => (
               <button key={i} onClick={() => setSelectedImage(i)}
                 style={{
-                  aspectRatio: '1/1', borderRadius: 10, overflow: 'hidden', background: '#f4f1ec',
-                  border: `2px solid ${selectedImage === i ? '#c8a96e' : 'transparent'}`,
+                  aspectRatio: '1/1', borderRadius: 'var(--radius-lg)', overflow: 'hidden', background: 'var(--bg-alt)',
+                  border: `2px solid ${selectedImage === i ? 'var(--accent)' : 'transparent'}`,
                   cursor: 'pointer', padding: 0, position: 'relative', transition: 'border-color 0.2s',
                 }}>
                 <Image src={img} alt="" fill style={{ objectFit: 'cover' }} sizes="100px" />
@@ -242,18 +240,17 @@ export default function ProductDetailClient({ product, related }: Props) {
     );
   };
 
-  // ── Tab content ──────────────────────────────────────────
   const renderTabContent = (section: ILayoutSection) => {
     const listItem = (text: string, i: number) => (
-      <li key={i} style={{ fontSize: 13, color: '#4a453f', fontWeight: 300, padding: '10px 0', display: 'flex', alignItems: 'flex-start', gap: 10, lineHeight: 1.65 }}>
-        <span style={{ color: '#c8a96e', fontSize: 17, lineHeight: 1, flexShrink: 0, marginTop: 3 }}>·</span>
+      <li key={i} style={{ fontSize: 13, color: 'var(--text-sub)', fontWeight: 300, padding: '10px 0', display: 'flex', alignItems: 'flex-start', gap: 10, lineHeight: 1.65 }}>
+        <span style={{ color: 'var(--accent)', fontSize: 17, lineHeight: 1, flexShrink: 0, marginTop: 3 }}>·</span>
         {text}
       </li>
     );
 
     if (section.type === 'description') {
       return (
-        <div style={{ fontSize: 14, color: '#4a453f', lineHeight: 1.85, fontWeight: 300 }}
+        <div style={{ fontSize: 14, color: 'var(--text-sub)', lineHeight: 1.85, fontWeight: 300 }}
           dangerouslySetInnerHTML={{ __html: product.description.replace(/\n/g, '<br/>') }} />
       );
     }
@@ -272,17 +269,17 @@ export default function ProductDetailClient({ product, related }: Props) {
             const isLong = field.type === 'textarea';
             const isExpanded = expandedTextFields.has(field.key);
             return (
-              <li key={field.key} style={{ display: 'flex', gap: 16, padding: '10px 0', alignItems: 'flex-start', background: 'transparent' }}>
-                <span style={{ width: 140, flexShrink: 0, fontSize: 13, fontWeight: 500, color: '#0a0a0a' }}>{field.label}</span>
+              <li key={field.key} style={{ display: 'flex', gap: 16, padding: '10px 0', alignItems: 'flex-start' }}>
+                <span style={{ width: 140, flexShrink: 0, fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{field.label}</span>
                 <div style={{ flex: 1 }}>
                   {isLong ? (
                     <div>
-                      <p style={{ fontSize: 13, color: '#4a453f', lineHeight: 1.7, fontWeight: 300, whiteSpace: 'pre-line', overflow: isExpanded ? 'visible' : 'hidden', display: '-webkit-box', WebkitLineClamp: isExpanded ? 'none' : 3, WebkitBoxOrient: 'vertical' } as React.CSSProperties}>
+                      <p style={{ fontSize: 13, color: 'var(--text-sub)', lineHeight: 1.7, fontWeight: 300, whiteSpace: 'pre-line', overflow: isExpanded ? 'visible' : 'hidden', display: '-webkit-box', WebkitLineClamp: isExpanded ? 'none' : 3, WebkitBoxOrient: 'vertical' } as React.CSSProperties}>
                         {String(value)}
                       </p>
                       {String(value).split('\n').length > 3 && (
                         <button onClick={() => setExpandedTextFields(p => { const n = new Set(p); n.has(field.key) ? n.delete(field.key) : n.add(field.key); return n; })}
-                          style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#0a0a0a', marginTop: 4, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
+                          style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text)', marginTop: 4, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
                           {isExpanded ? 'Show less' : 'Show more'}<ChevronDown size={11} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                         </button>
                       )}
@@ -313,25 +310,25 @@ export default function ProductDetailClient({ product, related }: Props) {
     : product.rating;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fafaf8' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       {lightbox !== null && <Lightbox images={product.images} initial={lightbox} onClose={() => setLightbox(null)} />}
 
       {/* Breadcrumb */}
-      <div style={{ background: '#f4f1ec' }}>
-        <div className="container" style={{ paddingTop: 16, paddingBottom: 16, display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#b0a99e', flexWrap: 'wrap' }}>
-          <Link href="/" style={{ color: '#b0a99e', textDecoration: 'none', transition: 'color 0.2s' }}>Home</Link>
-          <span style={{ color: '#c8c3bb' }}>›</span>
-          <Link href="/products" style={{ color: '#b0a99e', textDecoration: 'none', transition: 'color 0.2s' }}>Products</Link>
+      <div style={{ background: 'var(--bg-alt)', borderBottom: '1px solid var(--border)' }}>
+        <div className="container" style={{ paddingTop: 16, paddingBottom: 16, display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-faint)', flexWrap: 'wrap' }}>
+          <Link href="/" style={{ color: 'var(--text-faint)', textDecoration: 'none' }}>Home</Link>
+          <span style={{ color: 'var(--border-strong)' }}>›</span>
+          <Link href="/products" style={{ color: 'var(--text-faint)', textDecoration: 'none' }}>Products</Link>
           {typeof product.category === 'object' && (
             <>
-              <span style={{ color: '#c8c3bb' }}>›</span>
-              <Link href={`/category/${product.category.slug}`} style={{ color: '#b0a99e', textDecoration: 'none', transition: 'color 0.2s' }}>
+              <span style={{ color: 'var(--border-strong)' }}>›</span>
+              <Link href={`/category/${product.category.slug}`} style={{ color: 'var(--text-faint)', textDecoration: 'none' }}>
                 {product.category.name}
               </Link>
             </>
           )}
-          <span style={{ color: '#c8c3bb' }}>›</span>
-          <span style={{ color: '#4a453f', fontWeight: 500 }}>{product.name}</span>
+          <span style={{ color: 'var(--border-strong)' }}>›</span>
+          <span style={{ color: 'var(--text-sub)', fontWeight: 500 }}>{product.name}</span>
         </div>
       </div>
 
@@ -349,14 +346,14 @@ export default function ProductDetailClient({ product, related }: Props) {
 
             {/* Category tag */}
             {typeof product.category === 'object' && (
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#a07840', fontWeight: 500, marginBottom: 14 }}>
-                <span style={{ width: 16, height: 1, background: '#c8a96e', display: 'inline-block', flexShrink: 0 }} />
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--accent-dark)', fontWeight: 500, marginBottom: 14 }}>
+                <span style={{ width: 16, height: 1, background: 'var(--accent)', display: 'inline-block', flexShrink: 0 }} />
                 {product.category.name}
               </div>
             )}
 
             {/* Title */}
-            <h1 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: 'clamp(32px, 4vw, 52px)', fontWeight: 400, lineHeight: 1.1, color: '#0a0a0a', marginBottom: 18, letterSpacing: '-0.01em' }}>
+            <h1 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: 'clamp(32px, 4vw, 52px)', fontWeight: 400, lineHeight: 1.1, color: 'var(--text)', marginBottom: 18, letterSpacing: '-0.01em' }}>
               {product.name}
             </h1>
 
@@ -364,11 +361,11 @@ export default function ProductDetailClient({ product, related }: Props) {
             {product.reviewCount > 0 && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24, flexWrap: 'wrap' }}>
                 <Stars rating={avgRating} size={15} />
-                <span style={{ fontSize: 15, fontWeight: 500, color: '#0a0a0a' }}>{avgRating.toFixed(1)}</span>
-                <span style={{ color: '#ddd7cf' }}>·</span>
-                <span style={{ fontSize: 13, color: '#b0a99e' }}>{reviewCount} review{reviewCount !== 1 ? 's' : ''}</span>
-                <span style={{ color: '#ddd7cf' }}>·</span>
-                <a href="#reviews" style={{ fontSize: 13, color: '#a07840', textDecoration: 'none', borderBottom: '1px solid rgba(200,169,110,0.4)', paddingBottom: 1 }}>
+                <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--text)' }}>{avgRating.toFixed(1)}</span>
+                <span style={{ color: 'var(--border-strong)' }}>·</span>
+                <span style={{ fontSize: 13, color: 'var(--text-faint)' }}>{reviewCount} review{reviewCount !== 1 ? 's' : ''}</span>
+                <span style={{ color: 'var(--border-strong)' }}>·</span>
+                <a href="#reviews" style={{ fontSize: 13, color: 'var(--accent-dark)', textDecoration: 'none', borderBottom: '1px solid rgba(200,169,110,0.4)', paddingBottom: 1 }}>
                   Read reviews
                 </a>
               </div>
@@ -376,27 +373,27 @@ export default function ProductDetailClient({ product, related }: Props) {
 
             {/* Pricing */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 6, flexWrap: 'wrap' }}>
-              <span style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: 48, fontWeight: 600, color: '#0a0a0a', lineHeight: 1, letterSpacing: '-0.02em' }}>
+              <span style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: 48, fontWeight: 600, color: 'var(--text)', lineHeight: 1, letterSpacing: '-0.02em' }}>
                 {formatPrice(price)}
               </span>
               {product.salePrice && product.salePrice < product.price && (
-                <span style={{ fontSize: 22, color: '#b0a99e', textDecoration: 'line-through', fontWeight: 300 }}>
+                <span style={{ fontSize: 22, color: 'var(--text-faint)', textDecoration: 'line-through', fontWeight: 300 }}>
                   {formatPrice(product.price)}
                 </span>
               )}
               {discount && (
-                <span style={{ background: '#edf7f1', color: '#2d4a3e', fontSize: 12, fontWeight: 500, padding: '4px 10px', borderRadius: 20 }}>
+                <span style={{ background: 'var(--success-bg)', color: 'var(--success)', fontSize: 12, fontWeight: 500, padding: '4px 10px', borderRadius: 'var(--radius-pill)' }}>
                   Save {discount}%
                 </span>
               )}
             </div>
-            <p style={{ fontSize: 12, color: '#b0a99e', marginBottom: 22 }}>
+            <p style={{ fontSize: 12, color: 'var(--text-faint)', marginBottom: 22 }}>
               Inclusive of all taxes &nbsp;·&nbsp; Free delivery on orders above ₹499
             </p>
 
             {/* Short description */}
             {product.shortDescription && (
-              <p style={{ fontSize: 14, color: '#4a453f', lineHeight: 1.85, marginBottom: 20, fontWeight: 300 }}>
+              <p style={{ fontSize: 14, color: 'var(--text-sub)', lineHeight: 1.85, marginBottom: 20, fontWeight: 300 }}>
                 {product.shortDescription}
               </p>
             )}
@@ -405,7 +402,7 @@ export default function ProductDetailClient({ product, related }: Props) {
             {product.tags?.length > 0 && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 22 }}>
                 {product.tags.map(tag => (
-                  <span key={tag} style={{ padding: '5px 12px', borderRadius: 20, background: '#f4f1ec', fontSize: 11, color: '#4a453f' }}>
+                  <span key={tag} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--bg-alt)', fontSize: 11, color: 'var(--text-sub)' }}>
                     #{tag}
                   </span>
                 ))}
@@ -415,17 +412,17 @@ export default function ProductDetailClient({ product, related }: Props) {
             {/* Variants */}
             {Object.entries(variantGroups).map(([groupName, values]) => (
               <div key={groupName} style={{ marginBottom: 20 }}>
-                <p style={{ fontSize: 13, fontWeight: 500, color: '#0a0a0a', marginBottom: 10 }}>{groupName}:</p>
+                <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 10 }}>{groupName}:</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {values.map(value => {
                     const active = selectedVariant?.name === groupName && selectedVariant?.value === value;
                     return (
                       <button key={value} onClick={() => setSelectedVariant({ name: groupName, value })}
                         style={{
-                          padding: '8px 18px', borderRadius: 8, fontSize: 13, fontWeight: active ? 500 : 400,
-                          border: `1.5px solid ${active ? '#0a0a0a' : '#e8e4dd'}`,
-                          background: active ? '#0a0a0a' : 'transparent',
-                          color: active ? '#fafaf8' : '#4a453f',
+                          padding: '8px 18px', borderRadius: 'var(--radius)', fontSize: 13, fontWeight: active ? 500 : 400,
+                          border: `1.5px solid ${active ? 'var(--ink)' : 'var(--border)'}`,
+                          background: active ? 'var(--ink)' : 'transparent',
+                          color: active ? 'var(--ink-text)' : 'var(--text-sub)',
                           cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s',
                         }}>
                         {value}
@@ -440,29 +437,29 @@ export default function ProductDetailClient({ product, related }: Props) {
             <div style={{ marginBottom: 24 }}>
               <span style={{
                 display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12, fontWeight: 500,
-                color: product.stock > 0 ? '#2d4a3e' : '#c1392b', letterSpacing: '0.04em',
+                color: product.stock > 0 ? 'var(--success)' : 'var(--error)', letterSpacing: '0.04em',
               }}>
-                <span style={{ width: 7, height: 7, borderRadius: '50%', background: product.stock > 0 ? '#2d4a3e' : '#c1392b', flexShrink: 0, display: 'inline-block' }} />
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: product.stock > 0 ? 'var(--success)' : 'var(--error)', flexShrink: 0, display: 'inline-block' }} />
                 {product.stock <= 0 ? 'Out of Stock' : product.stock <= 5 ? `Only ${product.stock} left — Order soon` : 'In Stock — Ready to Ship'}
               </span>
             </div>
 
             {/* Qty + Add to Cart + Wishlist */}
             <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 10 }}>
-              <div style={{ display: 'flex', alignItems: 'center', background: '#f4f1ec', borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-alt)', borderRadius: 'var(--radius)', overflow: 'hidden', flexShrink: 0 }}>
                 <button onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                  style={{ width: 44, height: 52, background: 'none', border: 'none', cursor: 'pointer', color: '#4a453f', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = '#ece8e1')}
+                  style={{ width: 44, height: 52, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sub)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-muted)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'none')}
                   aria-label="Decrease">
                   <Minus size={14} />
                 </button>
-                <span style={{ width: 44, textAlign: 'center', fontSize: 15, fontWeight: 500, color: '#0a0a0a', lineHeight: '52px', userSelect: 'none' }}>
+                <span style={{ width: 44, textAlign: 'center', fontSize: 15, fontWeight: 500, color: 'var(--text)', lineHeight: '52px', userSelect: 'none' }}>
                   {quantity}
                 </span>
                 <button onClick={() => setQuantity(q => Math.min(product.stock || 99, q + 1))}
-                  style={{ width: 44, height: 52, background: 'none', border: 'none', cursor: 'pointer', color: '#4a453f', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = '#ece8e1')}
+                  style={{ width: 44, height: 52, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sub)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-muted)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'none')}
                   aria-label="Increase">
                   <Plus size={14} />
@@ -473,13 +470,16 @@ export default function ProductDetailClient({ product, related }: Props) {
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
                 style={{
-                  flex: 1, height: 52, background: product.stock === 0 ? '#b0a99e' : '#0a0a0a', color: '#fafaf8',
-                  border: 'none', borderRadius: 8, fontFamily: 'inherit', fontSize: 13, fontWeight: 500,
-                  letterSpacing: '0.1em', textTransform: 'uppercase', cursor: product.stock === 0 ? 'not-allowed' : 'pointer',
+                  flex: 1, height: 52,
+                  background: product.stock === 0 ? 'var(--text-faint)' : 'var(--ink)',
+                  color: 'var(--ink-text)',
+                  border: 'none', borderRadius: 'var(--radius)', fontFamily: 'inherit', fontSize: 13, fontWeight: 500,
+                  letterSpacing: '0.1em', textTransform: 'uppercase',
+                  cursor: product.stock === 0 ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'background 0.2s',
                 }}
-                onMouseEnter={e => { if (product.stock > 0) e.currentTarget.style.background = '#1e1e1a'; }}
-                onMouseLeave={e => { if (product.stock > 0) e.currentTarget.style.background = '#0a0a0a'; }}
+                onMouseEnter={e => { if (product.stock > 0) e.currentTarget.style.background = 'var(--ink-hover)'; }}
+                onMouseLeave={e => { if (product.stock > 0) e.currentTarget.style.background = 'var(--ink)'; }}
               >
                 <ShoppingBag size={15} />
                 {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
@@ -489,9 +489,9 @@ export default function ProductDetailClient({ product, related }: Props) {
                 onClick={handleWishlist}
                 aria-label="Wishlist"
                 style={{
-                  width: 52, height: 52, borderRadius: 8,
-                  background: wishlisted ? '#fdf2f2' : '#f4f1ec',
-                  color: wishlisted ? '#c1392b' : '#b0a99e',
+                  width: 52, height: 52, borderRadius: 'var(--radius)',
+                  background: wishlisted ? 'var(--error-bg)' : 'var(--bg-alt)',
+                  color: wishlisted ? 'var(--error)' : 'var(--text-faint)',
                   border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0, transition: 'all 0.2s',
                 }}
@@ -505,30 +505,31 @@ export default function ProductDetailClient({ product, related }: Props) {
               onClick={handleAddToCart}
               disabled={product.stock === 0}
               style={{
-                width: '100%', height: 50, background: 'none', border: '1.5px solid #0a0a0a', borderRadius: 8,
+                width: '100%', height: 50, background: 'none',
+                border: '1.5px solid var(--ink)', borderRadius: 'var(--radius)',
                 fontFamily: 'inherit', fontSize: 13, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase',
-                cursor: 'pointer', color: '#0a0a0a', transition: 'all 0.2s', marginBottom: 24, marginTop: 10,
+                cursor: 'pointer', color: 'var(--ink)', transition: 'all 0.2s', marginBottom: 24, marginTop: 10,
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#0a0a0a'; e.currentTarget.style.color = '#fafaf8'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#0a0a0a'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--ink)'; e.currentTarget.style.color = 'var(--ink-text)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--ink)'; }}
             >
               Buy Now
             </button>
 
             {/* Perks */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 28, padding: 18, background: '#f4f1ec', borderRadius: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 28, padding: 18, background: 'var(--bg-alt)', borderRadius: 'var(--radius-xl)' }}>
               {[
                 { icon: '🚚', label: 'Free Delivery', sub: 'Orders above ₹499' },
                 { icon: '✓', label: '100% Authentic', sub: 'Verified quality' },
                 { icon: '↩', label: '7-Day Returns', sub: 'Hassle-free' },
               ].map(p => (
                 <div key={p.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 7 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#fafaf8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
                     {p.icon}
                   </div>
                   <div>
-                    <strong style={{ fontSize: 12, fontWeight: 500, color: '#0a0a0a', display: 'block', marginBottom: 2 }}>{p.label}</strong>
-                    <span style={{ fontSize: 11, color: '#b0a99e' }}>{p.sub}</span>
+                    <strong style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', marginBottom: 2 }}>{p.label}</strong>
+                    <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>{p.sub}</span>
                   </div>
                 </div>
               ))}
@@ -537,17 +538,21 @@ export default function ProductDetailClient({ product, related }: Props) {
             {/* Tabs */}
             {tabSections.length > 0 && (
               <div style={{ marginTop: 4 }}>
-                <div style={{ display: 'flex', overflowX: 'auto', gap: 0, background: '#f4f1ec', borderRadius: 10, padding: 4 }}>
+                <div style={{ display: 'flex', overflowX: 'auto', gap: 0, background: 'var(--bg-alt)', borderRadius: 'var(--radius-lg)', padding: 4 }}>
                   {tabSections.map(section => {
                     const active = currentTab === section.id;
                     return (
                       <button key={section.id} onClick={() => setActiveTab(section.id)}
                         style={{
-                          padding: '10px 18px', background: active ? '#fafaf8' : 'transparent', border: 'none',
-                          borderRadius: 8,
+                          padding: '10px 18px',
+                          background: active ? 'var(--surface)' : 'transparent',
+                          border: 'none',
+                          borderRadius: 'var(--radius)',
                           fontFamily: 'inherit', fontSize: 13, fontWeight: active ? 500 : 400,
-                          color: active ? '#0a0a0a' : '#b0a99e', cursor: 'pointer', whiteSpace: 'nowrap',
-                          transition: 'all 0.15s', boxShadow: active ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
+                          color: active ? 'var(--text)' : 'var(--text-faint)',
+                          cursor: 'pointer', whiteSpace: 'nowrap',
+                          transition: 'all 0.15s',
+                          boxShadow: active ? 'var(--shadow-card)' : 'none',
                         }}>
                         {section.label ?? section.type}
                       </button>
@@ -569,20 +574,20 @@ export default function ProductDetailClient({ product, related }: Props) {
       {reviewCount > 0 && (
         <div className="container" style={{ paddingBottom: 72 }} id="reviews">
           <div style={{ marginBottom: 32 }}>
-            <h2 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: 34, fontWeight: 400, color: '#0a0a0a' }}>
-              Customer <em style={{ fontStyle: 'italic', color: '#a07840' }}>Reviews</em>
+            <h2 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: 34, fontWeight: 400, color: 'var(--text)' }}>
+              Customer <em style={{ fontStyle: 'italic', color: 'var(--accent-dark)' }}>Reviews</em>
             </h2>
-            <p style={{ fontSize: 13, color: '#b0a99e', marginTop: 6 }}>{reviewCount} verified purchase{reviewCount !== 1 ? 's' : ''}</p>
+            <p style={{ fontSize: 13, color: 'var(--text-faint)', marginTop: 6 }}>{reviewCount} verified purchase{reviewCount !== 1 ? 's' : ''}</p>
           </div>
 
           {/* Summary card */}
-          <div className="pdp-rating-summary" style={{ marginBottom: 36, padding: 28, background: '#f4f1ec', borderRadius: 16, alignItems: 'center' }}>
+          <div className="pdp-rating-summary" style={{ marginBottom: 36, padding: 28, background: 'var(--bg-alt)', borderRadius: 'var(--radius-xl)', alignItems: 'center' }}>
             <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <span style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: 72, fontWeight: 300, lineHeight: 1, color: '#0a0a0a', marginBottom: 10 }}>
+              <span style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: 72, fontWeight: 300, lineHeight: 1, color: 'var(--text)', marginBottom: 10 }}>
                 {avgRating.toFixed(1)}
               </span>
               <Stars rating={avgRating} size={18} />
-              <span style={{ fontSize: 12, color: '#b0a99e', marginTop: 8 }}>Based on {reviewCount} reviews</span>
+              <span style={{ fontSize: 12, color: 'var(--text-faint)', marginTop: 8 }}>Based on {reviewCount} reviews</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[5,4,3,2,1].map(star => {
@@ -590,11 +595,11 @@ export default function ProductDetailClient({ product, related }: Props) {
                 const pct = reviewCount > 0 ? (count / reviewCount) * 100 : 0;
                 return (
                   <div key={star} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span style={{ fontSize: 12, color: '#4a453f', width: 28, textAlign: 'right', flexShrink: 0 }}>{star}★</span>
-                    <div style={{ flex: 1, height: 6, background: '#e8e4dd', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', background: '#c8a96e', borderRadius: 3, width: `${pct}%`, transition: 'width 0.4s ease' }} />
+                    <span style={{ fontSize: 12, color: 'var(--text-sub)', width: 28, textAlign: 'right', flexShrink: 0 }}>{star}★</span>
+                    <div style={{ flex: 1, height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', background: 'var(--accent)', borderRadius: 3, width: `${pct}%`, transition: 'width 0.4s ease' }} />
                     </div>
-                    <span style={{ fontSize: 12, color: '#b0a99e', width: 28, flexShrink: 0 }}>{count}</span>
+                    <span style={{ fontSize: 12, color: 'var(--text-faint)', width: 28, flexShrink: 0 }}>{count}</span>
                   </div>
                 );
               })}
@@ -605,25 +610,25 @@ export default function ProductDetailClient({ product, related }: Props) {
           {reviews.length > 0 && (
             <div className="pdp-reviews-grid">
               {reviews.map(review => (
-                <div key={review._id} style={{ padding: 24, background: '#fff', borderRadius: 12 }}>
+                <div key={review._id} style={{ padding: 24, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                     <div>
-                      <p style={{ fontSize: 14, fontWeight: 500, color: '#0a0a0a' }}>{review.userName}</p>
-                      <p style={{ fontSize: 11, color: '#b0a99e', marginTop: 2 }}>
+                      <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>{review.userName}</p>
+                      <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 2 }}>
                         {new Date(review.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
                       </p>
                     </div>
                     <Stars rating={review.rating} size={12} />
                   </div>
                   {review.isVerifiedPurchase && (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, color: '#2d4a3e', fontWeight: 500, letterSpacing: '0.05em', marginBottom: 10 }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'var(--success)', fontWeight: 500, letterSpacing: '0.05em', marginBottom: 10 }}>
                       ✓ Verified Purchase
                     </span>
                   )}
                   {review.title && (
-                    <p style={{ fontSize: 13, fontWeight: 500, color: '#0a0a0a', marginBottom: 6 }}>{review.title}</p>
+                    <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 6 }}>{review.title}</p>
                   )}
-                  <p style={{ fontSize: 13, color: '#4a453f', lineHeight: 1.7, fontWeight: 300 }}>{review.comment}</p>
+                  <p style={{ fontSize: 13, color: 'var(--text-sub)', lineHeight: 1.7, fontWeight: 300 }}>{review.comment}</p>
                 </div>
               ))}
             </div>
@@ -636,16 +641,16 @@ export default function ProductDetailClient({ product, related }: Props) {
         <div className="container" style={{ paddingBottom: 80 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
             <div>
-              <h2 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: 34, fontWeight: 400, color: '#0a0a0a' }}>
-                You May Also <em style={{ fontStyle: 'italic', color: '#a07840' }}>Like</em>
+              <h2 style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: 34, fontWeight: 400, color: 'var(--text)' }}>
+                You May Also <em style={{ fontStyle: 'italic', color: 'var(--accent-dark)' }}>Like</em>
               </h2>
               {typeof product.category === 'object' && (
-                <p style={{ fontSize: 13, color: '#b0a99e', marginTop: 4 }}>More from our {product.category.name} collection</p>
+                <p style={{ fontSize: 13, color: 'var(--text-faint)', marginTop: 4 }}>More from our {product.category.name} collection</p>
               )}
             </div>
             {typeof product.category === 'object' && (
               <Link href={`/category/${product.category.slug}`}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', fontSize: 13, color: '#4a453f', fontWeight: 500 }}>
+                style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', fontSize: 13, color: 'var(--text-sub)', fontWeight: 500 }}>
                 View all →
               </Link>
             )}
